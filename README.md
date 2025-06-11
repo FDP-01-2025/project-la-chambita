@@ -14,8 +14,8 @@ Este proyecto consiste en un juego de aventuras donde el jugador debe explorar u
 
 ### Integrantes del equipo
 
-1. **Nombre completo:** [Nombre del estudiante 1]  
-   **Carnet:** [Carnet del estudiante 1]
+1. **Nombre completo:** Aaron Enmanuel Fuentes Murillo "the goat"  
+   **Carnet:** 00075925
 
 2. **Nombre completo:** [Nombre del estudiante 2]  
    **Carnet:** [Carnet del estudiante 2]
