@@ -1,0 +1,42 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compilar MiJuego",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "main.cpp",
+                "-o",
+                "MiJuego.exe",
+                "-I", "C:/Users/aaron/Desktop/raylib/install/include",
+                "-L", "C:/Users/aaron/Desktop/raylib/install/lib",
+                "-lraylib",
+                "-lopengl32",
+                "-lgdi32",
+                "-lwinmm"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"],
+            "detail": "Compilar usando g++ y raylib"
+        },
+        {
+            "label": "Ejecutar MiJuego",
+            "type": "shell",
+            "command": ".\\MiJuego.exe",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        }
+    ]
+}
