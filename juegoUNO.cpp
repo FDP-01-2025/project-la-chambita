@@ -1,15 +1,15 @@
 #include "juegoUNO.h"
 #include <algorithm>
 #include <random>
-#include <vector>
 #include <string>
 #include "raylib.h"
 
 // FUNCIONES:
 
-void inicializarMazo(vector<Carta> &mazo)
+void inicializarMazo(Juego_UNO &juego)
 {
     string colores[4] = {"rojo", "amarillo", "verde", "azul"};
+    int indice = 0;
 
     for (int i = 0; i < 4; i++)
     {
@@ -19,7 +19,8 @@ void inicializarMazo(vector<Carta> &mazo)
         c0.color = color;
         c0.tipo = Numero;
         c0.valor = 0;
-        mazo.push_back(c0);
+        c0.visible = false;
+        juego.mazo[indice++] = c0;
 
         for (int num = 1; num <= 9; num++)
         {
@@ -29,7 +30,8 @@ void inicializarMazo(vector<Carta> &mazo)
                 c.color = color;
                 c.tipo = Numero;
                 c.valor = num;
-                mazo.push_back(c);
+                c.visible = false;
+                juego.mazo[indice++] = c;
             }
         }
 
@@ -39,19 +41,22 @@ void inicializarMazo(vector<Carta> &mazo)
             cartaMasDos.color = color;
             cartaMasDos.tipo = Carta_Mas_dos; // Asignar el valor enum al campo tipo
             cartaMasDos.valor = -1;           // puedes usar -1 para cartas especiales sin número
-            mazo.push_back(cartaMasDos);
+            cartaMasDos.visible = false;
+            juego.mazo[indice++] = cartaMasDos;
 
             Carta Bloqueo;
             Bloqueo.color = color;
             Bloqueo.tipo = Carta_Bloqueo;
             Bloqueo.valor = -1;
-            mazo.push_back(Bloqueo);
+            Bloqueo.visible = false;
+            juego.mazo[indice++] = Bloqueo;
 
             Carta CambioDireccion;
             CambioDireccion.color = color;
             CambioDireccion.tipo = Cambio_direccion;
             CambioDireccion.valor = -1;
-            mazo.push_back(CambioDireccion);
+            CambioDireccion.visible = false;
+            juego.mazo[indice++] = CambioDireccion;
         }
     }
     for (int i = 0; i < 4; i++)
@@ -60,65 +65,61 @@ void inicializarMazo(vector<Carta> &mazo)
         cartaMasCuatro.color = "negro";
         cartaMasCuatro.tipo = Carta_Mas_cuatro;
         cartaMasCuatro.valor = -1;
-        mazo.push_back(cartaMasCuatro);
+        cartaMasCuatro.visible = false;
+        juego.mazo[indice++] = cartaMasCuatro;
 
         Carta cambioColor;
         cambioColor.color = "negro";
         cambioColor.tipo = Cambio_color;
         cambioColor.valor = -1;
-        mazo.push_back(cambioColor);
+        cambioColor.visible = false;
+        juego.mazo[indice++] = cambioColor;
     }
 }
 
-void barajarMazo(vector<Carta> &mazo)
+void barajarMazo(Juego_UNO &mazo)
 {
     random_device rd;
     mt19937 generador(rd());
-    shuffle(mazo.begin(), mazo.end(), generador);
+    shuffle(juego.mazo, juego.mazo + juego.cartasEnMazo, generador);
+
 }
 
-void repartirCartas(vector<Jugador> &jugadores, vector<Carta> &mazo)
+void repartirCartas(Juego_UNO & juego)
 {
     const int CARTAS_POR_JUGADOR = 7;
-
+    int CartaActual = 0;
     // recorre cada jugador
-    for (auto &jugador : jugadores)
+    for (int i = 0; i < juego.cantidadJugadores; i++)
     {
         // a cada jugador se le dan 7 cartas
-        for (int i = 0; i < 7; i++)
+        for (int j = 0; j < CARTAS_POR_JUGADOR; j++)
         {
-            if (!mazo.empty())
+            if (juego.cartasEnMazo <= 0)
             {
-                // toma la ultima carta del mazo
-                Carta carta = mazo.back();
-
-                jugador.mano.push_back(carta);
-
-                mazo.pop_back(); // elimina el ultimo valor del vector
+             if (juego.cartasEnMazo <= 0) {
+                cout << "Error: no hay suficientes cartas para repartir." << endl;
+                return;
             }
-            else
-            {
-                cout << "Error: no tenes suficientes cartas en el mazo para repartir." << endl;
-                return; // finaliza la ejecucion y devuelve control al main
-            }
+            juego.jugadores[i].mano[j] =juego.mazo[--juego.cartasEnMazo];
         }
     }
 }
 
-void pedirJugadores(vector<Jugador> &jugadores, int &cantidad)
+void ingresarNombres (Juego_UNO & juego);
 {
-    int cantidad_jugadores;
+    int cantidad;
 
     // pedir cantidad de jugadores
     do
     {
         cout << "cuantos jugadores van a jugar, de 2 a 4? ";
-        cin >> cantidad_jugadores;
-        if (cantidad_jugadores < 2 || cantidad_jugadores > 4)
+        cin >> cantidad;
+        if (cantidad < 2 || cantidad > 4)
         {
             cout << "numero no valido. tiene que ser entre 2 y cuatro." << endl;
         }
-    } while (cantidad_jugadores < 2 || cantidad_jugadores > 4);
+    } while (cantidad < 2 || cantidad > 4);
 
     cin.ignore();
 
@@ -167,11 +168,9 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial)
         int x = xInicial + i * espacioX;
         int y = yInicial;
 
-
         // Dibuja una carta como un rectángulo de 80 píxeles de ancho y 120 de alto
         DrawRectangle(x, y, 80, 120, LIGHTGRAY);
         DrawRectangleLines(x, y, 80, 120, BLACK);
-
 
         // Se decide el color con el que se dibujará el texto dentro de la carta, según el color de la carta UNO.
         Color colorTexto = BLACK;
@@ -186,8 +185,7 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial)
         else if (carta.color == "negro")
             colorTexto = DARKGRAY;
 
-
-            //Aquí se traduce el tipo de carta a un texto (o emoji) que aparecerá dentro del rectángulo. se pasa a to string 
+        // Aquí se traduce el tipo de carta a un texto (o emoji) que aparecerá dentro del rectángulo. se pasa a to string
         string textoCarta;
         switch (carta.tipo)
         {
@@ -213,7 +211,7 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial)
             textoCarta = "?";
             break;
         }
-    // Muestra el texto o símbolo de la carta dentro del rectángulo.
+        // Muestra el texto o símbolo de la carta dentro del rectángulo.
         DrawText(textoCarta.c_str(), x + 30, y + 50, 20, colorTexto);
     }
 

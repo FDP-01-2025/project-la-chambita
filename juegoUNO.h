@@ -3,11 +3,14 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
 #include <fstream>
 
 using namespace std;
 
+
+const int MAX_JUGADORES = 4;
+const int MAX_CARTAS_POR_JUGADOR = 30;
+const int MAX_MAZO = 108;
 // caracteristicas de los tipos de cartas
 enum tipo_de_Carta
 {
@@ -37,13 +40,14 @@ struct Carta
     int valor;
     string nombreMinijuego;
     string descripcion;
+    bool visible; // si la carta esta volteada o visible
 };
 
 // caracteristicas del jugador
 struct Jugador
 {
     string nombre;
-    vector<Carta> mano; // las cartas que tiene en la mano
+    Carta mano[MAX_CARTAS_POR_JUGADOR]; // las cartas que tiene en la mano
     int minijuegos_ganados;
     int partidas_ganadas;
     bool esTurno;
@@ -52,19 +56,28 @@ struct Jugador
 // caracteristicas del juego
 struct Juego_UNO
 {
-    vector<Carta> mazo;     // la baraja principal de donde se agarran cartas
-    vector<Carta> descarte; // es la pila de cartas que ya se han jugado
-    vector<Jugador> jugadores;
+    Carta mazo[MAX_MAZO];
+    int cartasEnMazo;
+
+    Carta descarte[MAX_MAZO];
+    int cartasEnDescarte;
+
+    Jugador jugadores [MAX_JUGADORES];
+    int cantidadJugadores; //cant real de jugadores 
+
     int turno_actual; // indice del jugador que va estar jugando
     int direccion;    // 1 o -1 (la direccion normal o invertida)
-    estado_de_juego estadoDeJuego;
+    estado_de_juego estadoDeJuego; 
+    
+
 };
 
 // Funciones
-void inicializarMazo(vector<Carta> &mazo);
-void barajarMazo(vector<Carta> &mazo);
-void repartirCartas(vector<Jugador> &jugadores, vector<Carta> &mazo);
-void pedirJugadores(vector<Jugador> &jugadores, int &cantidad);
-void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial);
+void inicializarMazo(Juego_UNO &juego);
+void barajarMazo(Juego_UNO &juego);
+void repartirCartas(Juego_UNO &juego);
+void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas);
+void ingresarNombres(Juego_UNO & juego);
+void procesarTurno(Juego_UNO & juego);  
 
 #endif
