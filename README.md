@@ -20,7 +20,7 @@ Este proyecto consiste en un juego de aventuras donde el jugador debe explorar u
 2. **Nombre completo:** Joel Andres Escalante Rivas 
    **Carnet:** 00031825
 
-3. **Nombre completo:** [Nombre del estudiante 3]  
+4. **Nombre completo:** [Nombre del estudiante 3]  
    **Carnet:** [Carnet del estudiante 3]
 
 (Agregar más integrantes si es necesario)
