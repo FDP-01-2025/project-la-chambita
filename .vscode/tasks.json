@@ -2,16 +2,18 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Compilar MiJuego",
+            "label": "Compilar UNO",
             "type": "shell",
             "command": "g++",
             "args": [
                 "main.cpp",
+                "juegoUNO.cpp",
                 "-o",
-                "MiJuego.exe",
-                "-I", "C:/Users/aaron/Desktop/raylib/install/include",
-                "-L", "C:/Users/aaron/Desktop/raylib/install/lib",
+                "UNO.exe",
+                "-I", "${workspaceFolder}/raylib/install/include",
+                "-L", "${workspaceFolder}/raylib/install/lib",
                 "-lraylib",
+                "-lglfw3",
                 "-lopengl32",
                 "-lgdi32",
                 "-lwinmm"
@@ -20,21 +22,18 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": ["$gcc"],
-            "detail": "Compilar usando g++ y raylib"
+            "problemMatcher": ["$gcc"]
         },
         {
-            "label": "Ejecutar MiJuego",
+            "label": "Ejecutar UNO",
             "type": "shell",
-            "command": ".\\MiJuego.exe",
+            "command": ".\\UNO.exe",
             "group": {
                 "kind": "test",
                 "isDefault": true
             },
             "presentation": {
-                "echo": true,
                 "reveal": "always",
-                "focus": false,
                 "panel": "shared"
             }
         }
