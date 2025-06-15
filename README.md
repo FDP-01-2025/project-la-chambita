@@ -39,7 +39,9 @@ Este proyecto consiste en un juego de aventuras donde el jugador debe explorar u
 
 2. Descarga la carpeta `raylib` desde este enlace de Google Drive
 (https://drive.google.com/drive/u/3/folders/1uWnt6Va2Kp9Ir7MU2Te1IuwiFfcBpKq8)
- y colócala dentro del repositorio **en la raíz del proyecto**, de modo que quede así:
+
+- descomprime el .zip y muevelo al escritorio
+- colócala dentro del repositorio **en la raíz del proyecto**, de modo que quede así:
 
 project-la-chambita/
 ├── main.cpp
