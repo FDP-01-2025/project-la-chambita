@@ -77,7 +77,8 @@ void inicializarMazo(Juego_UNO &juego);
 void barajarMazo(Juego_UNO &juego);
 void repartirCartas(Juego_UNO &juego);
 void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas);
-void ingresarNombres(Juego_UNO & juego);
-void procesarTurno(Juego_UNO & juego);  
+void capturarNombresEnLaVentana (Juego_UNO & juego, int &jugadorActual, string &entradaActual, bool &nombresCompletos);
+void procesarTurno(Juego_UNO & juego);
+void seleccionarCatidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada);
 
 #endif

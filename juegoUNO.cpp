@@ -103,48 +103,50 @@ void repartirCartas(Juego_UNO &juego)
     }
 }
 
-void ingresarNombres(Juego_UNO &juego)
-{
-    int cantidad;
+void capturarNombresEnLaVentana(Juego_UNO &juego, int &jugadorActual, string &entradaActual, bool &nombresCompletos){
 
-    // pedir cantidad de jugadores
-    do
+    // captura las teclas como caracteres
+    int letra = GetCharPressed();
+
+    while (letra > 0)
     {
-        cout << "cuantos jugadores van a jugar, de 2 a 4? ";
-        cin >> cantidad;
-        if (cantidad < 2 || cantidad > 4)
+        // // Solo acepta caracteres imprimibles de espacio a-z y 20 letras por nombre
+        if (letra >= 32 && letra <= 125 && entradaActual.length() < 20)
         {
-            cout << "numero no valido. tiene que ser entre 2 y cuatro." << endl;
+            entradaActual += static_cast<char>(letra); // agrega la letra al nombre
         }
-    } while (cantidad < 2 || cantidad > 4);
-
-    cin.ignore();
-    juego.cantidadJugadores = cantidad;
-
-    // pedir nombre a cada jugador
-    for (int i = 0; i < cantidad; i++)
-    {
-        cout << "nombre del jugador " << i + 1 << ": " << endl;
-        getline(cin, juego.jugadores[i].nombre);
-        juego.jugadores[i].minijuegos_ganados = 0;
-        juego.jugadores[i].partidas_ganadas = 0;
-        juego.jugadores[i].esTurno = false;
+        letra = GetCharPressed(); // sigue capturando siempre y cuando se esten presionando teclas
     }
 
-    // guardar nombres en un archivo
-    ofstream archivo("registro_jugadores.txt", ios::app);
-    if (archivo.is_open())
+    // Si se presiona BACKSPACE y hay texto, borra el último carácter
+    if (IsKeyPressed(KEY_BACKSPACE) && !entradaActual.empty())
     {
-        for (int i = 0; i < cantidad; i++)
+        entradaActual.pop_back(); // borra 1 letra del final
+    }
+
+    // cuando presione enter, y ya se haya escrito algo
+    if (IsKeyPressed(KEY_ENTER) && !entradaActual.empty())
+    {
+
+        // esto guarda el nombre actual en el jugador que corresponde
+        juego.jugadores[jugadorActual].nombre = entradaActual;
+        juego.jugadores[jugadorActual].minijuegos_ganados = 0;
+        juego.jugadores[jugadorActual].partidas_ganadas = 0;
+        juego.jugadores[jugadorActual].esTurno = false;
+
+        entradaActual.clear(); // limpia la entrada para el sig. jugador
+        jugadorActual++;       // pasa al sig. jugador
+
+        if (jugadorActual >= juego.cantidadJugadores)
         {
-            archivo << juego.jugadores[i].nombre << endl;
+            nombresCompletos = true;
         }
-        archivo.close();
     }
-    else
-    {
-        cout << "no se pudo abrir el archivo de registro. " << endl;
-    }
+
+    // esto vamostrar las instrucciones en pantalla
+    DrawText("Escribe el nombre del jugador: ", 100, 100, 30, DARKGRAY);
+    DrawText(TextFormat("jugador %d:", jugadorActual + 1), 100, 150, 30, BLUE);
+    DrawText(entradaActual.c_str(), 100, 200, 30, BLUE);
 }
 
 // Esta función dibuja en pantalla todas las cartas que un jugador tiene en su mano
@@ -221,8 +223,10 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
     DrawText(jugador.nombre.c_str(), xInicial, yInicial - 30, 20, BLACK);
 }
 
-void imprimirMazo(const Juego_UNO &juego) {
-    for (int i = 0; i < juego.cartasEnMazo; i++) {
+void imprimirMazo(const Juego_UNO &juego)
+{
+    for (int i = 0; i < juego.cartasEnMazo; i++)
+    {
         cout << "[" << juego.mazo[i].color << ", ";
         if (juego.mazo[i].tipo == Numero)
             cout << juego.mazo[i].valor;
@@ -231,4 +235,30 @@ void imprimirMazo(const Juego_UNO &juego) {
         cout << "] ";
     }
     cout << endl;
+}
+
+void seleccionarCatidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada)
+{
+    DrawText("selecciona la cantidad de jugadores: ", 100, 100, 30, DARKGRAY);
+
+    Rectangle botones[3]{
+        {100, 200, 100, 50},
+        {250, 200, 100, 50},
+        {400, 200, 100, 50}};
+
+        for(int i = 0; i < 3; i++){
+            DrawRectangleRec(botones[i], LIGHTGRAY);
+            DrawRectangleLinesEx(botones[i], 2, BLACK); //esta wea es pura estetica. son contornos para rectangulos
+            DrawText(TextFormat("%d", i+2),botones[i].x + 35, botones[i].y + 10, 30, BLACK);  //el %d dice que espera un valor entero
+        }
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
+            Vector2 mouse = GetMousePosition();
+            for (int i =0; i <3; i++){
+                if(CheckCollisionPointRec(mouse, botones[i])){
+                    juego.cantidadJugadores = i+2;
+                    cantidadSeleccionada = true;
+                }
+            }
+        }
 }
