@@ -17,10 +17,10 @@ Este proyecto consiste en un juego de aventuras donde el jugador debe explorar u
 1. **Nombre completo:** Aaron Enmanuel Fuentes Murillo "the goat"  
    **Carnet:** 00075925
 
-2. **Nombre completo:** [Nombre del estudiante 2]  
-   **Carnet:** [Carnet del estudiante 2]
+2. **Nombre completo:** Joel Andres Escalante Rivas 
+   **Carnet:** 00031825
 
-3. **Nombre completo:** [Nombre del estudiante 3]  
+4. **Nombre completo:** [Nombre del estudiante 3]  
    **Carnet:** [Carnet del estudiante 3]
 
 (Agregar más integrantes si es necesario)
