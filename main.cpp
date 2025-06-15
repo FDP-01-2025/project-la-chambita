@@ -22,16 +22,16 @@ juego.direccion = 1;
 int cantidad = 0;
 
 // registro de nombres para cada jugador
-pedirJugadores(juego.jugadores, cantidad);
+ingresarNombres(juego);
 
 // crea y llena el mazo principal de donde se agarraran cartas
-inicializarMazo(juego.mazo);
+inicializarMazo(juego);
 
 // lo barajea para que el orden sea random
-barajarMazo(juego.mazo);
+barajarMazo(juego);
 
 // le damos 7 cartas a cada jugador
-repartirCartas(juego.jugadores, juego.mazo);
+repartirCartas(juego);
 
 
 
@@ -45,10 +45,14 @@ while(!WindowShouldClose()){
     
     ClearBackground (RAYWHITE);
 
-    dibujarCartasJugador(juego.jugadores[0], 100, 100);
+    dibujarCartasJugador(juego.jugadores[0], 100, 100, true);
 
 if (cantidad == 2)
-    dibujarCartasJugador(juego.jugadores[1], 100, 300);
+    dibujarCartasJugador(juego.jugadores[1], 100, 300, false);
+
+    DrawRectangle(800, 400, 80, 120, DARKGRAY); // mazo
+DrawText("MAZO", 810, 460, 20, WHITE);
+
 
     EndDrawing();
 

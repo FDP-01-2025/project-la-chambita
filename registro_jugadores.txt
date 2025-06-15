@@ -20,3 +20,9 @@ agua
 pan
 pepe
 juan
+pepe
+juan
+pepejuan
+juan
+si
+no

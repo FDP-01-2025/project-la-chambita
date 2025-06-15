@@ -75,38 +75,35 @@ void inicializarMazo(Juego_UNO &juego)
         cambioColor.visible = false;
         juego.mazo[indice++] = cambioColor;
     }
+    juego.cartasEnMazo = indice;
 }
 
 void barajarMazo(Juego_UNO &mazo)
 {
     random_device rd;
     mt19937 generador(rd());
-    shuffle(juego.mazo, juego.mazo + juego.cartasEnMazo, generador);
-
+    shuffle(mazo.mazo, mazo.mazo + mazo.cartasEnMazo, generador);
 }
 
-void repartirCartas(Juego_UNO & juego)
+void repartirCartas(Juego_UNO &juego)
 {
     const int CARTAS_POR_JUGADOR = 7;
-    int CartaActual = 0;
-    // recorre cada jugador
+
     for (int i = 0; i < juego.cantidadJugadores; i++)
     {
-        // a cada jugador se le dan 7 cartas
         for (int j = 0; j < CARTAS_POR_JUGADOR; j++)
         {
             if (juego.cartasEnMazo <= 0)
             {
-             if (juego.cartasEnMazo <= 0) {
                 cout << "Error: no hay suficientes cartas para repartir." << endl;
                 return;
             }
-            juego.jugadores[i].mano[j] =juego.mazo[--juego.cartasEnMazo];
+            juego.jugadores[i].mano[j] = juego.mazo[--juego.cartasEnMazo];
         }
     }
 }
 
-void ingresarNombres (Juego_UNO & juego);
+void ingresarNombres(Juego_UNO &juego)
 {
     int cantidad;
 
@@ -122,26 +119,25 @@ void ingresarNombres (Juego_UNO & juego);
     } while (cantidad < 2 || cantidad > 4);
 
     cin.ignore();
+    juego.cantidadJugadores = cantidad;
 
     // pedir nombre a cada jugador
-    for (int i = 0; i < cantidad_jugadores; i++)
+    for (int i = 0; i < cantidad; i++)
     {
-        Jugador nuevo;
         cout << "nombre del jugador " << i + 1 << ": " << endl;
-        getline(cin, nuevo.nombre);
-        nuevo.minijuegos_ganados = 0;
-        nuevo.partidas_ganadas = 0;
-        nuevo.esTurno = false;
-        jugadores.push_back(nuevo);
+        getline(cin, juego.jugadores[i].nombre);
+        juego.jugadores[i].minijuegos_ganados = 0;
+        juego.jugadores[i].partidas_ganadas = 0;
+        juego.jugadores[i].esTurno = false;
     }
 
     // guardar nombres en un archivo
     ofstream archivo("registro_jugadores.txt", ios::app);
     if (archivo.is_open())
     {
-        for (const auto &j : jugadores)
+        for (int i = 0; i < cantidad; i++)
         {
-            archivo << j.nombre << endl;
+            archivo << juego.jugadores[i].nombre << endl;
         }
         archivo.close();
     }
@@ -152,16 +148,22 @@ void ingresarNombres (Juego_UNO & juego);
 }
 
 // Esta función dibuja en pantalla todas las cartas que un jugador tiene en su mano
-void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial)
+void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas)
 {
 
     // esto defne el espcio horizontal entre una carta y otra para que no se encimen.
     int espacioX = 100;
 
     // Recorre cada carta de la mano del jugador.
-    for (size_t i = 0; i < jugador.mano.size(); i++)
+    for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
     {
+        if (!mostrarTodas && !jugador.mano[i].visible)
+            continue;
+
         const Carta &carta = jugador.mano[i];
+
+        if (carta.color.empty())
+            continue;
 
         /*Calcula la posición de cada carta en el eje X (horizontal) sumando el espacio entre cartas.
         El eje Y permanece fijo para que todas las cartas estén alineadas en fila*/
@@ -217,4 +219,16 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial)
 
     // Dibuja el nombre del jugador sobre su fila de cartas.
     DrawText(jugador.nombre.c_str(), xInicial, yInicial - 30, 20, BLACK);
+}
+
+void imprimirMazo(const Juego_UNO &juego) {
+    for (int i = 0; i < juego.cartasEnMazo; i++) {
+        cout << "[" << juego.mazo[i].color << ", ";
+        if (juego.mazo[i].tipo == Numero)
+            cout << juego.mazo[i].valor;
+        else
+            cout << "Especial";
+        cout << "] ";
+    }
+    cout << endl;
 }
