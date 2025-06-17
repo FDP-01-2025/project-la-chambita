@@ -1,3 +1,5 @@
+// definir o decirle al programa como funciona cada cosa
+
 #include "juegoUNO.h"
 #include <algorithm>
 #include <random>
@@ -160,7 +162,7 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
     for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
     {
         if (!mostrarTodas && !jugador.mano[i].visible)
-            continue;
+            continue; // continue: omitir la iteración actual del bucle y pasar a la siguiente iteración.
 
         const Carta &carta = jugador.mano[i];
 
@@ -194,32 +196,40 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
         switch (carta.tipo)
         {
         case Numero:
-            textoCarta = to_string(carta.valor);
+            textoCarta = to_string(carta.valor); // convierte el valor de int a string para ponerlo en la carta
             break;
         case Carta_Mas_dos:
-            textoCarta = "➕2️⃣";
+            textoCarta = "+2";
             break;
         case Carta_Mas_cuatro:
-            textoCarta = "➕4️⃣";
+            textoCarta = "+4️";
             break;
         case Cambio_color:
             textoCarta = "Color";
             break;
         case Cambio_direccion:
-            textoCarta = "🔄";
+            textoCarta = "Reversa";
             break;
         case Carta_Bloqueo:
-            textoCarta = "🚫";
+            textoCarta = "Bloqueo";
             break;
         default:
             textoCarta = "?";
             break;
         }
+
+        // centra el texto horizontalmente en la carta
+        int anchoTexto = MeasureText(textoCarta.c_str(), 20);
+        int textoX = x + (80 / 2) - (anchoTexto / 2);
+        int textoY = y + 50;
+
         // Muestra el texto o símbolo de la carta dentro del rectángulo.
-        DrawText(textoCarta.c_str(), x + 30, y + 50, 20, colorTexto);
+        DrawText(textoCarta.c_str(), textoX, textoY, 20, colorTexto);
     }
 
     // Dibuja el nombre del jugador sobre su fila de cartas.
+    int anchoNombre = MeasureText(jugador.nombre.c_str(), 20);
+    int nombreX = xInicial + ((MAX_CARTAS_POR_JUGADOR * espacioX) - anchoNombre / 2);
     DrawText(jugador.nombre.c_str(), xInicial, yInicial - 30, 20, BLACK);
 }
 
@@ -246,19 +256,254 @@ void seleccionarCatidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada)
         {250, 200, 100, 50},
         {400, 200, 100, 50}};
 
-        for(int i = 0; i < 3; i++){
-            DrawRectangleRec(botones[i], LIGHTGRAY);
-            DrawRectangleLinesEx(botones[i], 2, BLACK); //esta wea es pura estetica. son contornos para rectangulos
-            DrawText(TextFormat("%d", i+2),botones[i].x + 35, botones[i].y + 10, 30, BLACK);  //el %d dice que espera un valor entero
-        }
+    for (int i = 0; i < 3; i++)
+    {
+        DrawRectangleRec(botones[i], LIGHTGRAY);
+        DrawRectangleLinesEx(botones[i], 2, BLACK);                                         // esta wea es pura estetica. son contornos para rectangulos
+        DrawText(TextFormat("%d", i + 2), botones[i].x + 35, botones[i].y + 10, 30, BLACK); // el %d dice que espera un valor entero
+    }
 
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
-            Vector2 mouse = GetMousePosition();
-            for (int i =0; i <3; i++){
-                if(CheckCollisionPointRec(mouse, botones[i])){
-                    juego.cantidadJugadores = i+2;
-                    cantidadSeleccionada = true;
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    {
+        Vector2 mouse = GetMousePosition();
+        for (int i = 0; i < 3; i++)
+        {
+            if (CheckCollisionPointRec(mouse, botones[i]))
+            {
+                juego.cantidadJugadores = i + 2;
+                cantidadSeleccionada = true;
+            }
+        }
+    }
+}
+
+// Función para comprobar si una carta se puede jugar
+bool sePuedeJugar(Carta actual, Carta elegida)
+{
+    return (elegida.color == actual.color ||
+            elegida.valor == actual.valor ||
+            elegida.tipo == Cambio_color ||
+            elegida.tipo == Carta_Mas_cuatro);
+}
+
+bool cartaTuvoDobleClick(const Rectangle &rect)
+{
+    static float tiempoUltimoClick = 0;
+    static int clicks = 0;
+
+    if (CheckCollisionPointRec(GetMousePosition(), rect))
+    {
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        {
+            float tiempoActual = GetTime();
+            if (tiempoActual - tiempoUltimoClick < 0.3f)
+            { // 0.3 (segundos) f(porque es valor float)
+                clicks++;
+                if (clicks == 2)
+                {
+                    clicks = 0;
+                    return true;
+                }
+            }
+            else
+            {
+                clicks = 1;
+            }
+            tiempoUltimoClick = tiempoActual;
+        }
+    }
+    return false;
+}
+
+void dibujarZonaDescarte(const Carta &carta, int x, int y)
+{
+    DrawRectangle(x, y, 80, 120, LIGHTGRAY);
+    DrawRectangleLines(x, y, 80, 120, BLACK);
+
+    Color colorTexto = BLACK;
+    if (carta.color == "rojo")
+        colorTexto = RED;
+
+    else if (carta.color == "amarillo")
+        colorTexto = YELLOW;
+
+    else if (carta.color == "verde")
+        colorTexto = GREEN;
+
+    else if (carta.color == "azul")
+        colorTexto = BLUE;
+
+    else if (carta.color == "negro")
+        colorTexto = DARKGRAY;
+
+    string textoCarta;
+    switch (carta.tipo)
+    {
+    case Numero:
+        textoCarta = to_string(carta.valor);
+        break;
+
+    case Carta_Mas_dos:
+        textoCarta = "+2";
+        break;
+
+    case Carta_Mas_cuatro:
+        textoCarta = "+4";
+        break;
+
+    case Cambio_direccion:
+        textoCarta = "Rev";
+        break;
+
+    case Carta_Bloqueo:
+        textoCarta = "bloqueo";
+        break;
+
+    default:
+        textoCarta = "?";
+        break;
+    }
+
+    // esto dibuja el texto en la carta (casi centrado xd)
+    DrawText(textoCarta.c_str(), x + 30, y + 50, 30, colorTexto);
+}
+
+bool jugadorRobaSiDaClick(Rectangle zonaMazo, Juego_UNO &juego, int jugador)
+{
+
+    // si se usa el mouse en la zona del mazo:
+    if (CheckCollisionPointRec(GetMousePosition(), zonaMazo) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    {
+
+        // si aun hay cartas en el mazo Y el jugador NO ha excedido su limite de cartaw
+        if (juego.cartasEnMazo > 0)
+        {
+            Jugador &j = juego.jugadores[jugador];
+
+            // enccuentra la primra posicion libre en la baraja del jugador
+            for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
+            {
+                if (j.mano[i].color.empty())
+                {                                                 // esto es un espacio vacio
+                    j.mano[i] = juego.mazo[--juego.cartasEnMazo]; // restar uno a juego.cartasEnMazo antes de usar su valor
+                    j.mano[i].visible = true;                     // la muestra en pantalla
+                    return true;                                  // se robo correctamennte
                 }
             }
         }
+        return false; // que hubo un error al robar
+    }
+    return false;
+}
+
+ZonaVisual obtenerZonaVisual()
+{
+    ZonaVisual zona;
+    zona.zonaMazo = {1000, 300, 80, 120};
+    zona.xDescarte = 1100;
+    zona.yDescarte = 300;
+    return zona;
+}
+
+void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
+{
+    ZonaVisual zona = obtenerZonaVisual();
+
+    while (!WindowShouldClose())
+    {
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+
+        if (!cantidadSeleccionada)
+        {
+            seleccionarCatidadJugadores(juego, cantidadSeleccionada);
+        }
+        else if (!nombresCompletos)
+        {
+            capturarNombresEnLaVentana(juego, jugadorActual, entradaActual, nombresCompletos);
+        }
+        else
+        {
+            if (juego.estadoDeJuego == esperando_jugadores)
+            {
+                repartirCartas(juego);
+                juego.estadoDeJuego = turno_normal;
+                juego.cartaEnJuego = robarCartaValida(juego);
+                actualizarVisibilidadCartas(juego);
+            }
+
+            for (int i = 0; i < juego.cantidadJugadores; i++)
+            {
+                int y = 100 + i * 150;
+                bool mostrar = (i == juego.turno_actual);
+                dibujarCartasJugador(juego.jugadores[i], 100, y, mostrar);
+            }
+
+            DrawRectangleRec(zona.zonaMazo, DARKGRAY);
+            DrawText("MAZO", zona.zonaMazo.x + 10, zona.zonaMazo.y + 60, 20, WHITE);
+
+            dibujarZonaDescarte(juego.cartaEnJuego, zona.xDescarte, zona.yDescarte);
+            juego.cartaEnJuego = robarCartaValida(juego);
+            jugadorRobaSiDaClick(zona.zonaMazo, juego, juego.turno_actual);
+            
+        }
+
+        EndDrawing();
+    }
+}
+
+Juego_UNO crearJuegoUNO()
+{
+    Juego_UNO juego;
+    juego.estadoDeJuego = esperando_jugadores;
+    juego.turno_actual = 0;
+    juego.direccion = 1;
+    return juego;
+}
+
+void iniciarVariablesEstado(bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
+{
+    cantidadSeleccionada = false;
+    jugadorActual = 0;
+    entradaActual = "";
+    nombresCompletos = false;
+}
+
+void actualizarVisibilidadCartas(Juego_UNO &juego)
+{
+    for (int i = 0; i < juego.cantidadJugadores; i++)
+    {
+        for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+        {
+            juego.jugadores[i].mano[j].visible = (i == juego.turno_actual);
+        }
+    }
+}
+
+// Avanza el turno respetando el sentido del juego
+void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_UNO &juego)
+{
+    jugadorActual = (jugadorActual + direccion + totalJugadores) % totalJugadores;
+    juego.turno_actual = jugadorActual;
+    actualizarVisibilidadCartas(juego);
+}
+
+Carta robarCartaValida(Juego_UNO &juego){
+
+    if (juego.cartasEnMazo <= 0){
+        return Carta{};
+    }
+
+    while (juego.cartasEnMazo > 0){
+        Carta carta = juego.mazo[juego.cartasEnMazo -1];  //toma la ultima carta
+        juego.cartasEnMazo --; //disminuye el contador del mazo
+
+        if (sePuedeJugar(carta, juego.cartaEnJuego)){
+            return carta;
+        }
+        else{
+            continue;  
+        }
+    }
+    return Carta{};
 }
