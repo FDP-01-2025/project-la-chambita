@@ -8,7 +8,7 @@ int main()
 
     // aqui va lo de raylib
 
-    InitWindow(1080, 720, " UNO con minijuegos");
+    InitWindow(1920,1080, " UNO con minijuegos");
     SetTargetFPS(30);
 
     Juego_UNO juego = crearJuegoUNO();
@@ -24,5 +24,7 @@ int main()
     barajarMazo(juego);
 
     ejecutarJuego(juego, cantidadSeleccionada, jugadorActual, entradaActual, nombresCompletos);
+
+    CloseWindow();
     return 0;
 }

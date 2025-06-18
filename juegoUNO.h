@@ -12,6 +12,12 @@ using namespace std;
 const int MAX_JUGADORES = 4;
 const int MAX_CARTAS_POR_JUGADOR = 30;
 const int MAX_MAZO = 108;
+const int CARTA_ANCHO= 80;
+const int CARTA_ALTO = 120;
+const int ESPACIO_X =100;
+const int ESPACIO_Y = 100;
+const int INICIO_X = 100;
+const int INICIO_Y =100;
 
 // caracteristicas de los tipos de cartas
 enum tipo_de_Carta
@@ -93,7 +99,7 @@ void capturarNombresEnLaVentana(Juego_UNO &juego, int &jugadorActual, string &en
 void procesarTurno(Juego_UNO &juego);
 void seleccionarCatidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada);
 bool sePuedeJugar(Carta actual, Carta elegida);
-bool cartaTuvoDobleClick(const Rectangle rect);
+void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_UNO &juego);
 void dibujarZonaDescarte(const Carta &carta, int x, int y);
 bool jugadorRobaSiClick(const Rectangle& zonaMazo, Juego_UNO &juego, int jugador);
 Carta robarCartaValida(Juego_UNO &juego);

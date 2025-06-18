@@ -105,7 +105,8 @@ void repartirCartas(Juego_UNO &juego)
     }
 }
 
-void capturarNombresEnLaVentana(Juego_UNO &juego, int &jugadorActual, string &entradaActual, bool &nombresCompletos){
+void capturarNombresEnLaVentana(Juego_UNO &juego, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
+{
 
     // captura las teclas como caracteres
     int letra = GetCharPressed();
@@ -171,12 +172,11 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
 
         /*Calcula la posición de cada carta en el eje X (horizontal) sumando el espacio entre cartas.
         El eje Y permanece fijo para que todas las cartas estén alineadas en fila*/
-        int x = xInicial + i * espacioX;
+        int x = xInicial + i * ESPACIO_X;
         int y = yInicial;
 
-        // Dibuja una carta como un rectángulo de 80 píxeles de ancho y 120 de alto
-        DrawRectangle(x, y, 80, 120, LIGHTGRAY);
-        DrawRectangleLines(x, y, 80, 120, BLACK);
+        DrawRectangle(x, y, CARTA_ANCHO, CARTA_ALTO, LIGHTGRAY);
+        DrawRectangleLines(x, y, CARTA_ANCHO, CARTA_ALTO, BLACK);
 
         // Se decide el color con el que se dibujará el texto dentro de la carta, según el color de la carta UNO.
         Color colorTexto = BLACK;
@@ -280,10 +280,22 @@ void seleccionarCatidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada)
 // Función para comprobar si una carta se puede jugar
 bool sePuedeJugar(Carta actual, Carta elegida)
 {
-    return (elegida.color == actual.color ||
-            elegida.valor == actual.valor ||
-            elegida.tipo == Cambio_color ||
-            elegida.tipo == Carta_Mas_cuatro);
+    //
+    if(elegida.tipo == Cambio_color || elegida.tipo == Carta_Mas_cuatro || elegida.tipo == Carta_Mas_dos || elegida.tipo == Carta_Bloqueo || elegida.tipo == Cambio_direccion)
+    return true;
+
+    //coincide color
+    if (elegida.color == actual.color)
+    return true;
+
+    //si son del mismo numero 
+    if(elegida.tipo == Numero && actual.tipo == Numero && elegida.valor == actual.valor)
+    return true;
+
+    if(elegida.tipo == actual.tipo)
+    return true;
+
+    return false;
 }
 
 bool cartaTuvoDobleClick(const Rectangle &rect)
@@ -317,55 +329,65 @@ bool cartaTuvoDobleClick(const Rectangle &rect)
 
 void dibujarZonaDescarte(const Carta &carta, int x, int y)
 {
-    DrawRectangle(x, y, 80, 120, LIGHTGRAY);
-    DrawRectangleLines(x, y, 80, 120, BLACK);
+    if (carta.color.empty())
+        return;
 
-    Color colorTexto = BLACK;
-    if (carta.color == "rojo")
-        colorTexto = RED;
-
-    else if (carta.color == "amarillo")
-        colorTexto = YELLOW;
-
-    else if (carta.color == "verde")
-        colorTexto = GREEN;
-
-    else if (carta.color == "azul")
-        colorTexto = BLUE;
-
-    else if (carta.color == "negro")
-        colorTexto = DARKGRAY;
-
-    string textoCarta;
-    switch (carta.tipo)
+    else
     {
-    case Numero:
-        textoCarta = to_string(carta.valor);
-        break;
+        DrawRectangle(x, y, 80, 120, LIGHTGRAY);
+        DrawRectangleLines(x, y, 80, 120, BLACK);
 
-    case Carta_Mas_dos:
-        textoCarta = "+2";
-        break;
+        Color colorTexto = BLACK;
+        if (carta.color == "rojo")
+            colorTexto = RED;
 
-    case Carta_Mas_cuatro:
-        textoCarta = "+4";
-        break;
+        else if (carta.color == "amarillo")
+            colorTexto = YELLOW;
 
-    case Cambio_direccion:
-        textoCarta = "Rev";
-        break;
+        else if (carta.color == "verde")
+            colorTexto = GREEN;
 
-    case Carta_Bloqueo:
-        textoCarta = "bloqueo";
-        break;
+        else if (carta.color == "azul")
+            colorTexto = BLUE;
 
-    default:
-        textoCarta = "?";
-        break;
+        else if (carta.color == "negro")
+            colorTexto = DARKGRAY;
+
+        string textoCarta;
+        switch (carta.tipo)
+        {
+        case Numero:
+            textoCarta = to_string(carta.valor);
+            break;
+
+        case Carta_Mas_dos:
+            textoCarta = "+2";
+            break;
+
+        case Carta_Mas_cuatro:
+            textoCarta = "+4";
+            break;
+
+        case Cambio_direccion:
+            textoCarta = "Rev";
+            break;
+
+        case Carta_Bloqueo:
+            textoCarta = "bloqueo";
+            break;
+
+        case Cambio_color:
+            textoCarta = "Color?";
+            break;
+
+        default:
+            textoCarta = "?";
+            break;
+        }
+
+        // esto dibuja el texto en la carta (casi centrado xd)
+        DrawText(textoCarta.c_str(), x + 30, y + 50, 30, colorTexto);
     }
-
-    // esto dibuja el texto en la carta (casi centrado xd)
-    DrawText(textoCarta.c_str(), x + 30, y + 50, 30, colorTexto);
 }
 
 bool jugadorRobaSiDaClick(Rectangle zonaMazo, Juego_UNO &juego, int jugador)
@@ -443,9 +465,42 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
             DrawText("MAZO", zona.zonaMazo.x + 10, zona.zonaMazo.y + 60, 20, WHITE);
 
             dibujarZonaDescarte(juego.cartaEnJuego, zona.xDescarte, zona.yDescarte);
-            juego.cartaEnJuego = robarCartaValida(juego);
+
+            Jugador &jugador = juego.jugadores[juego.turno_actual];
+
+            for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
+            {
+                Carta &carta = jugador.mano[i];
+
+                if (!carta.visible || carta.color.empty())
+                    continue;
+
+                int x = INICIO_X + i * ESPACIO_X;
+                int y = INICIO_Y + juego.turno_actual * 150;
+
+                Rectangle rect = {(float)x, (float)y, (float)CARTA_ANCHO, (float)CARTA_ALTO};
+
+                // TEMPORALLLLL
+                DrawRectangleLines(rect.x, rect.y, rect.width, rect.height, RED);
+
+                if (cartaTuvoDobleClick(rect) && sePuedeJugar(juego.cartaEnJuego, carta))
+                {
+                    //solo para verificar que se tiro en cada turno
+                  cout << "Carta jugada: " << carta.color << ", tipo: " << carta.tipo << ", valor: " << carta.valor << endl;
+
+                    // reemplaza la carta dela mano
+                    juego.cartaEnJuego = carta;
+
+                    // elimina la carta de la mano
+                    carta = Carta{};
+
+                    // avanza el turno
+                    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+                    actualizarVisibilidadCartas(juego);
+                    break; // solo se puede jugar una carta por turno
+                }
+            }
             jugadorRobaSiDaClick(zona.zonaMazo, juego, juego.turno_actual);
-            
         }
 
         EndDrawing();
@@ -488,21 +543,26 @@ void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_U
     actualizarVisibilidadCartas(juego);
 }
 
-Carta robarCartaValida(Juego_UNO &juego){
+Carta robarCartaValida(Juego_UNO &juego)
+{
 
-    if (juego.cartasEnMazo <= 0){
+    if (juego.cartasEnMazo <= 0)
+    {
         return Carta{};
     }
 
-    while (juego.cartasEnMazo > 0){
-        Carta carta = juego.mazo[juego.cartasEnMazo -1];  //toma la ultima carta
-        juego.cartasEnMazo --; //disminuye el contador del mazo
+    while (juego.cartasEnMazo > 0)
+    {
+        Carta carta = juego.mazo[juego.cartasEnMazo - 1]; // toma la ultima carta
+        juego.cartasEnMazo--;                             // disminuye el contador del mazo
 
-        if (sePuedeJugar(carta, juego.cartaEnJuego)){
+        if (sePuedeJugar(carta, juego.cartaEnJuego))
+        {
             return carta;
         }
-        else{
-            continue;  
+        else
+        {
+            continue;
         }
     }
     return Carta{};
