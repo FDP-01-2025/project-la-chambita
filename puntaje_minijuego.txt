@@ -21,3 +21,19 @@ Palabra: computadora
 Intentos: 1
 Resultado: GANASTE
 ----------------------
+Palabra: variable
+Intentos: 1
+Resultado: GANASTE
+----------------------
+Palabra: programacion
+Intentos: 1
+Resultado: GANASTE
+----------------------
+Palabra: funcion
+Intentos: 2
+Resultado: GANASTE
+----------------------
+Palabra: funcion
+Intentos: 1
+Resultado: GANASTE
+----------------------
