@@ -5,3 +5,19 @@ Palabra: computadora
 Intentos: 3
 Resultado: GANASTE
 ----------------------
+Palabra: programacion
+Intentos: 2
+Resultado: GANASTE
+----------------------
+Palabra: computadora
+Intentos: 3
+Resultado: GANASTE
+----------------------
+Palabra: funcion
+Intentos: 3
+Resultado: GANASTE
+----------------------
+Palabra: computadora
+Intentos: 1
+Resultado: GANASTE
+----------------------
