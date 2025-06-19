@@ -1,0 +1,7 @@
+Palabra: programacion
+Intentos: 8
+Resultado: GANASTE
+Palabra: computadora
+Intentos: 3
+Resultado: GANASTE
+----------------------
