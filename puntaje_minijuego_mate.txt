@@ -13,3 +13,36 @@ Resultado: GANASTE
 Respuesta dada: a
 Resultado: GANASTE
 ----------------------
+Respuesta dada: a
+Resultado: GANASTE
+----------------------
+Respuesta dada: d
+Resultado: PERDISTE
+----------------------
+Respuesta dada: c
+Resultado: PERDISTE
+----------------------
+Respuesta dada: b
+Resultado: GANASTE
+----------------------
+Respuesta dada: b
+Resultado: GANASTE
+----------------------
+Respuesta dada: a
+Resultado: GANASTE
+----------------------
+Respuesta dada: c
+Resultado: PERDISTE
+----------------------
+Respuesta dada: c
+Resultado: PERDISTE
+----------------------
+Respuesta dada: a
+Resultado: GANASTE
+----------------------
+Respuesta dada: b
+Resultado: GANASTE
+----------------------
+Respuesta dada: c
+Resultado: PERDISTE
+----------------------

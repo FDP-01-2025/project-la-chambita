@@ -27,11 +27,11 @@ bool jugarMinijuegoMatematico() {
     InitWindow(ancho, alto, "Minijuego: Ejercicio Matematico");
     SetTargetFPS(60);
 
-    Texture2D fondo = LoadTexture("imagenMate.jpg");
+    Texture2D fondo = LoadTexture("fondo2.jpg");
 
     // Lista de preguntas disponibles
     Pregunta preguntas[] = {
-        {"6 ÷6 \xF7 2 (1 + 2)", {"a) 1", "b) 9", "c) 6", "d) 0"}, 'b'},
+        {"6 ÷6 x 2 (1 + 2)", {"a) 1", "b) 9", "c) 6", "d) 0"}, 'c'},
         {"5 + 3 * 2",        {"a) 16", "b) 11", "c) 10", "d) 8"}, 'b'},
         {"(4 + 2) * 3",      {"a) 18", "b) 14", "c) 12", "d) 20"}, 'a'}
     };
@@ -68,44 +68,79 @@ bool jugarMinijuegoMatematico() {
         }
 
         BeginDrawing();
-        DrawTexture(fondo, 0, 0, WHITE);
-        ClearBackground(RAYWHITE);
+            ClearBackground(RAYWHITE);
+            DrawTexture(fondo, 0, 0, WHITE);
 
-        // Titulo y enunciado
-        DrawText("Resuelve el ejercicio matematico:", 40, 70, 25, DARKBLUE);
-        DrawText(preguntaActual.texto, ancho / 2 - MeasureText(preguntaActual.texto, 40) / 2, 120, 40, BLACK);
+            // Título centrado, más abajo
+            const char* titulo = "Resuelve el ejercicio matematico:";
+            int tituloFontSize = 30;
+            int tituloY = 40;
+            int tituloX = (ancho - MeasureText(titulo, tituloFontSize)) / 2;
+            DrawText(titulo, tituloX, tituloY, tituloFontSize, DARKBLUE);
 
-        // Mostrar opciones (2 columnas)
-        for (int i = 0; i < 4; i++) {
-            int x = (i % 2 == 0) ? 180 : 420;
-            int y = 200 + (i / 2) * 80;
-            Color colorFondo = (seleccionActual == ('a' + i)) ? YELLOW : LIGHTGRAY;
-            DrawRectangle(x, y, 160, 50, colorFondo);
-            DrawText(preguntaActual.opciones[i], x + 10, y + 15, 20, BLACK);
-        }
+            // Pregunta centrada
+            int preguntaFontSize = 40;
+            int preguntaY = tituloY + tituloFontSize + 20;
+            int preguntaX = (ancho - MeasureText(preguntaActual.texto, preguntaFontSize)) / 2;
+            DrawText(preguntaActual.texto, preguntaX, preguntaY, preguntaFontSize, BLACK);
 
-        // Mostrar intentos
-        DrawText(TextFormat("Intentos: %d / %d", intentos, maxIntentos), 600, 60, 20, MAROON);
+            // Opciones en dos columnas con buen espacio
+            int opcionFontSize = 22;
+            int espacioEntreFilas = 70;
+            int margenIzquierdoCol1 = 150;
+            int margenIzquierdoCol2 = 450;
+            int primerFilaY = preguntaY + preguntaFontSize + 40;
+
+            for (int i = 0; i < 4; i++) {
+                int colX = (i % 2 == 0) ? margenIzquierdoCol1 : margenIzquierdoCol2;
+                int filaY = primerFilaY + (i / 2) * espacioEntreFilas;
+
+                int rectWidth = 180;
+                int rectHeight = 55;
+                Color colorFondo = (seleccionActual == ('a' + i)) ? YELLOW : LIGHTGRAY;
+                DrawRectangle(colX, filaY, rectWidth, rectHeight, colorFondo);
+
+                int textoX = colX + 15;
+                int textoY = filaY + (rectHeight / 2) - (opcionFontSize / 2);
+                DrawText(preguntaActual.opciones[i], textoX, textoY, opcionFontSize, BLACK);
+            }
+
+            // Intentos arriba derecha
+            DrawText(TextFormat("Intentos: %d / %d", intentos, maxIntentos), ancho - 160, 20, 20, MAROON);
 
         EndDrawing();
     }
 
     // Mostrar mensaje final por 5 segundos
-    double tInicio = GetTime();
-    while (!WindowShouldClose() && (GetTime() - tInicio < 5.0)) {
-        BeginDrawing();
-        DrawTexture(fondo, 0, 0, WHITE);
+   // Mostrar mensaje final por 5 segundos
+double tInicio = GetTime();
+while (!WindowShouldClose() && (GetTime() - tInicio < 5.0)) {
+    BeginDrawing();
         ClearBackground(RAYWHITE);
+        DrawTexture(fondo, 0, 0, WHITE);
 
         if (gano) {
-            DrawText("\xA1Correcto! Has ganado.", ancho / 2 - MeasureText("\xA1Correcto! Has ganado.", 30) / 2, 200, 30, GREEN);
+            const char* mensajeGanar = "¡Correcto! Has ganado.";
+            int fontSize = 30;
+            int x = (ancho - MeasureText(mensajeGanar, fontSize)) / 2;
+            DrawText(mensajeGanar, x, 200, fontSize, DARKGREEN);
         } else {
-            DrawText("Perdiste. La respuesta correcta era: ", 180, 200, 25, RED);
-            DrawText(TextFormat("%c", preguntaActual.respuestaCorrecta), 530, 200, 25, DARKGRAY);
+            const char* mensajePerder = "Perdiste. La respuesta correcta era:";
+            int fontSize = 25;
+            int yMensaje = 180;
+            int xMensaje = (ancho - MeasureText(mensajePerder, fontSize)) / 2;
+            DrawText(mensajePerder, xMensaje, yMensaje, fontSize, RED);
+
+            // Mostrar la letra correcta centrada justo debajo
+            char letraCorrecta[2] = { preguntaActual.respuestaCorrecta, '\0' };
+            int letraFontSize = 40;
+            int xLetra = (ancho - MeasureText(letraCorrecta, letraFontSize)) / 2;
+            int yLetra = yMensaje + 40;
+            DrawText(letraCorrecta, xLetra, yLetra, letraFontSize, DARKGRAY);
         }
 
-        EndDrawing();
-    }
+    EndDrawing();
+}
 
     UnloadTexture(fondo);
     CloseWindow();
