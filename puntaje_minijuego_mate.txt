@@ -1,0 +1,6 @@
+Respuesta dada: b
+Resultado: GANASTE
+----------------------
+Respuesta dada: b
+Resultado: GANASTE
+----------------------

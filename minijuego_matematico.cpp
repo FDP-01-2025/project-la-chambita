@@ -21,7 +21,7 @@ bool jugarMinijuegoMatematico() {
     SetTargetFPS(60);
 
     // Cargar fondo
-    Texture2D fondo = LoadTexture("wallpapper1.png");
+    Texture2D fondo = LoadTexture("imagenMate.jpg");
 
     const char *pregunta = "6 ÷ 2 (1 + 2)";
     const char *opciones[4] = {"a) 1", "b) 9", "c) 6", "d) 0"};
