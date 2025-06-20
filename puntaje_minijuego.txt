@@ -37,3 +37,7 @@ Palabra: funcion
 Intentos: 1
 Resultado: GANASTE
 ----------------------
+Palabra: variable
+Intentos: 1
+Resultado: GANASTE
+----------------------
