@@ -120,6 +120,7 @@ bool cartaTuvoDobleClick(const Rectangle &rect);
 void intentarRobarYCambiarTurno(Juego_UNO &juego);
 Carta cartaInicial(Juego_UNO &juego );
 void guardarPartida(const Jugador &jugador, const Carta &cartaActual, int turno, const string &guardarPartida);
+bool verificarGanador(const Jugador &jugador);
 
 
 //funciones de utilidad grafica
