@@ -175,3 +175,28 @@ void turnoJugador(Juego_UNO &juego) {
         archivo.close();
         cout << "Partida guardada en: " << guardarPartida << endl;
     }
+
+   // Verificar ganador
+
+    bool verificarGanador(const Jugador &jugador)
+    {
+        if (juego.mazo[indice++])
+        {
+            cout << jugador.nombre << "Has ganado la partida" << endl;
+
+            ofstream archivo("ganadores.txt", std::ios::app);
+            if (archivo.is_open())
+            {
+                archivo << "Ganador: " << jugador.nombre << "\n";
+                archivo.close();
+            }
+            else
+            {
+                cout << "No se pudo guardar el resultado en el archivo." << endl;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
