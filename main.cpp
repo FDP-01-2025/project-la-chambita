@@ -26,5 +26,14 @@ int main()
     ejecutarJuego(juego, cantidadSeleccionada, jugadorActual, entradaActual, nombresCompletos);
 
     CloseWindow();
+
+    EstadisticasJugador stats;
+
+// Simulación al terminar una partida
+bool jugadorGano = true;
+int minijuegosEstaPartida = 2;
+
+actualizarEstadisticas(stats, jugadorGano, minijuegosEstaPartida);
+
     return 0;
 }

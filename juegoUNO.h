@@ -89,24 +89,49 @@ struct ZonaVisual
 };
 
 // Funciones solo declaradas
-void ejecutarJuego(Juego_UNO &juego);
 
-void inicializarMazo(Juego_UNO &juego);
-void barajarMazo(Juego_UNO &juego);
-void repartirCartas(Juego_UNO &juego);
-void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas);
-void capturarNombresEnLaVentana(Juego_UNO &juego, int &jugadorActual, string &entradaActual, bool &nombresCompletos);
-void procesarTurno(Juego_UNO &juego);
-void seleccionarCatidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada);
-bool sePuedeJugar(Carta actual, Carta elegida);
-void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_UNO &juego);
-void dibujarZonaDescarte(const Carta &carta, int x, int y);
-bool jugadorRobaSiClick(const Rectangle& zonaMazo, Juego_UNO &juego, int jugador);
-Carta robarCartaValida(Juego_UNO &juego);
-ZonaVisual obtenerZonaVisual();
+//inicializacion y preparacion del juego
 Juego_UNO crearJuegoUNO();
 void iniciarVariablesEstado(bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos);
-void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos);
+void inicializarMazo(Juego_UNO &juego);
+void barajarMazo(Juego_UNO &juego);
+
+
+//interaccion inicial con el jugador
+void seleccionarCantidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada);
+void capturarNombresEnLaVentana(Juego_UNO &juego, int &jugadorActual, string &entradaActual, bool &nombresCompletos);
+
+
+//comienzo del juego
+void repartirCartas(Juego_UNO &juego);
+Carta robarCartaValida(Juego_UNO &juego);
 void actualizarVisibilidadCartas(Juego_UNO &juego);
+
+
+//logica y turnos de jugabilidad
+void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos);
+void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas);
+void dibujarZonaDescarte(const Carta &carta, int x, int y);
+bool jugadorRobaSiClick(const Rectangle& zonaMazo, Juego_UNO &juego, int jugador);
+bool sePuedeJugar(Carta actual, Carta elegida);
+bool tieneCartaJugable(const Jugador &jugador,Carta cartaEnjuego);
+void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_UNO &juego);
+bool cartaTuvoDobleClick(const Rectangle &rect);
+void intentarRobarYCambiarTurno(Juego_UNO &juego);
+Carta cartaInicial(Juego_UNO &juego );
+
+//funciones de utilidad grafica
+ZonaVisual obtenerZonaVisual();
+
+
+//estructuras de estadisticas del jugador
+struct EstadisticasJugador {
+    int partidasJugadas = 0;
+    int partidasGanadas = 0;
+    int partidasPerdidas = 0;
+    int minijuegosJugados = 0;
+};
+
+
 
 #endif
