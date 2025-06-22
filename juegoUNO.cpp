@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <random>
 #include <string>
+#include <fstream>
 #include "raylib.h"
 
 // FUNCIONES:
@@ -637,4 +638,29 @@ ZonaVisual obtenerZonaVisual()
     zona.xDescarte = 1100;
     zona.yDescarte = 300;
     return zona;
+}
+
+
+// Esta función actualiza las estadísticas del jugador y las guarda en un archivo de texto
+// Recibe una referencia a las estadísticas del jugador, un booleano que indica si ganó la partida,
+// y el número de minijuegos jugados en la partida actual.
+
+void actualizarEstadisticas(EstadisticasJugador& stats, bool ganoPartida, int minijuegosJugadosEnPartida) {
+    stats.partidasJugadas++;
+    if (ganoPartida) {
+        stats.partidasGanadas++;
+    } else {
+        stats.partidasPerdidas++;
+    }
+    stats.minijuegosJugados += minijuegosJugadosEnPartida;
+
+    // Guarda en archivo de texto
+    std::ofstream archivo("estadisticas.txt");
+    if (archivo.is_open()) {
+        archivo << "Partidas Jugadas: " << stats.partidasJugadas << '\n';
+        archivo << "Partidas Ganadas: " << stats.partidasGanadas << '\n';
+        archivo << "Partidas Perdidas: " << stats.partidasPerdidas << '\n';
+        archivo << "Minijuegos Jugados: " << stats.minijuegosJugados << '\n';
+        archivo.close();
+    }
 }

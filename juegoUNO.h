@@ -124,4 +124,14 @@ Carta cartaInicial(Juego_UNO &juego );
 ZonaVisual obtenerZonaVisual();
 
 
+//estructuras de estadisticas del jugador
+struct EstadisticasJugador {
+    int partidasJugadas = 0;
+    int partidasGanadas = 0;
+    int partidasPerdidas = 0;
+    int minijuegosJugados = 0;
+};
+
+
+
 #endif
