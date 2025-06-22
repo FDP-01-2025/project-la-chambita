@@ -132,6 +132,16 @@ struct EstadisticasJugador {
     int minijuegosJugados = 0;
 };
 
+//
+struct MensajeTemporal {
+    string texto;
+    float tiempoRestante; // en segundos
+    bool activo;
+
+    MensajeTemporal() : texto(""), tiempoRestante(0), activo(false) {}
+};
+
+
 
 
 #endif

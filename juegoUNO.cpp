@@ -664,3 +664,40 @@ void actualizarEstadisticas(EstadisticasJugador& stats, bool ganoPartida, int mi
         archivo.close();
     }
 }
+
+// Activa el mensaje temporal con el texto y duración especificados
+void ActivarMensaje(MensajeTemporal &mensaje, const string& texto, float duracion) {
+    mensaje.texto = texto;
+    mensaje.tiempoRestante = duracion;
+    mensaje.activo = true;
+}
+
+// Dibuja el mensaje en pantalla si está activo
+void DibujarMensaje(MensajeTemporal &mensaje, float deltaTime) {
+    if (mensaje.activo) {
+        DrawText(mensaje.texto.c_str(), 100, 100, 30, RAYWHITE); // puedes ajustar posición/tamaño/color
+        mensaje.tiempoRestante -= deltaTime;
+
+        if (mensaje.tiempoRestante <= 0) {
+            mensaje.activo = false;
+        }
+    }
+}
+
+MensajeTemporal mensaje; // global o dentro del scope principal
+
+// Cuando cambia el turno
+ActivarMensaje(mensaje, "¡Turno del Jugador 2!", 2.5f);
+
+// Dentro del game loop
+float deltaTime = GetFrameTime();
+BeginDrawing();
+ClearBackground(BLACK);
+
+// ... otros dibujos
+
+DibujarMensaje(mensaje, deltaTime);
+
+EndDrawing();
+
+
