@@ -8,6 +8,23 @@
 
 // FUNCIONES:
 
+Juego_UNO crearJuegoUNO()
+{
+    Juego_UNO juego;
+    juego.estadoDeJuego = esperando_jugadores;
+    juego.turno_actual = 0;
+    juego.direccion = 1;
+    return juego;
+}
+
+void iniciarVariablesEstado(bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
+{
+    cantidadSeleccionada = false;
+    jugadorActual = 0;
+    entradaActual = "";
+    nombresCompletos = false;
+}
+
 void inicializarMazo(Juego_UNO &juego)
 {
     string colores[4] = {"rojo", "amarillo", "verde", "azul"};
@@ -87,20 +104,32 @@ void barajarMazo(Juego_UNO &mazo)
     shuffle(mazo.mazo, mazo.mazo + mazo.cartasEnMazo, generador);
 }
 
-void repartirCartas(Juego_UNO &juego)
+void seleccionarCantidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada)
 {
-    const int CARTAS_POR_JUGADOR = 7;
+    DrawText("selecciona la cantidad de jugadores: ", 100, 100, 30, DARKGRAY);
 
-    for (int i = 0; i < juego.cantidadJugadores; i++)
+    Rectangle botones[3]{
+        {100, 200, 100, 50},
+        {250, 200, 100, 50},
+        {400, 200, 100, 50}};
+
+    for (int i = 0; i < 3; i++)
     {
-        for (int j = 0; j < CARTAS_POR_JUGADOR; j++)
+        DrawRectangleRec(botones[i], LIGHTGRAY);
+        DrawRectangleLinesEx(botones[i], 2, BLACK);                                         // esta wea es pura estetica. son contornos para rectangulos
+        DrawText(TextFormat("%d", i + 2), botones[i].x + 35, botones[i].y + 10, 30, BLACK); // el %d dice que espera un valor entero
+    }
+
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    {
+        Vector2 mouse = GetMousePosition();
+        for (int i = 0; i < 3; i++)
         {
-            if (juego.cartasEnMazo <= 0)
+            if (CheckCollisionPointRec(mouse, botones[i]))
             {
-                cout << "Error: no hay suficientes cartas para repartir." << endl;
-                return;
+                juego.cantidadJugadores = i + 2;
+                cantidadSeleccionada = true;
             }
-            juego.jugadores[i].mano[j] = juego.mazo[--juego.cartasEnMazo];
         }
     }
 }
@@ -150,6 +179,243 @@ void capturarNombresEnLaVentana(Juego_UNO &juego, int &jugadorActual, string &en
     DrawText("Escribe el nombre del jugador: ", 100, 100, 30, DARKGRAY);
     DrawText(TextFormat("jugador %d:", jugadorActual + 1), 100, 150, 30, BLUE);
     DrawText(entradaActual.c_str(), 100, 200, 30, BLUE);
+}
+
+void repartirCartas(Juego_UNO &juego)
+{
+    const int CARTAS_POR_JUGADOR = 7;
+
+    for (int i = 0; i < juego.cantidadJugadores; i++)
+    {
+        for (int j = 0; j < CARTAS_POR_JUGADOR; j++)
+        {
+            if (juego.cartasEnMazo <= 0)
+            {
+                cout << "Error: no hay suficientes cartas para repartir." << endl;
+                return;
+            }
+            juego.jugadores[i].mano[j] = juego.mazo[--juego.cartasEnMazo];
+        }
+    }
+}
+
+void intentarRobarYCambiarTurno(Juego_UNO &juego)
+{
+    Carta cartaRobada = robarCartaValida(juego);
+    if (sePuedeJugar(juego.cartaEnJuego, cartaRobada))
+    {
+        juego.cartaEnJuego = cartaRobada;
+        // no agrego la carta ala baraja pq ya se jugo de una
+    }
+
+    else
+    {
+        // si no se puede jugar se agrega a la baraja
+        Jugador &jugador = juego.jugadores[juego.turno_actual];
+        for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
+        {
+            if (jugador.mano[i].color.empty())
+            {
+                jugador.mano[i] = cartaRobada;
+                break;
+            }
+        }
+    }
+
+    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+    actualizarVisibilidadCartas(juego);
+}
+
+bool tieneCartaJugable(const Jugador &jugador, Carta cartaEnjuego)
+{
+    for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
+    {
+        const Carta &c = jugador.mano[i];
+        if (!c.color.empty() && sePuedeJugar(cartaEnjuego, c))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+Carta robarCartaValida(Juego_UNO &juego)
+{
+    if (juego.cartasEnMazo <= 0)
+        return Carta{}; // No hay cartas en el mazo
+
+    // Roba la carta
+    Carta cartaRobada = juego.mazo[--juego.cartasEnMazo];
+    cartaRobada.visible = true;
+
+    // Si se puede jugar, se convierte en la nueva carta en juego
+    if (sePuedeJugar(juego.cartaEnJuego, cartaRobada))
+    {
+        juego.cartaEnJuego = cartaRobada;
+    }
+    else
+    {
+        // Si no se puede jugar, se le agrega al jugador actual
+        Jugador &jugador = juego.jugadores[juego.turno_actual];
+
+        for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
+        {
+            if (jugador.mano[i].color.empty())
+            {
+                jugador.mano[i] = cartaRobada;
+                break;
+            }
+        }
+
+        // Avanza el turno porque no pudo jugar
+        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+    }
+
+    return Carta{}; // ya no se necesita devolver nada útil
+}
+
+void actualizarVisibilidadCartas(Juego_UNO &juego)
+{
+    for (int i = 0; i < juego.cantidadJugadores; i++)
+    {
+        for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+        {
+            juego.jugadores[i].mano[j].visible = (i == juego.turno_actual);
+        }
+    }
+}
+
+Carta cartaInicial(Juego_UNO &juego)
+{
+    while (juego.cartasEnMazo > 0)
+    {
+        Carta carta = juego.mazo[--juego.cartasEnMazo];
+        if (carta.tipo != Carta_Mas_cuatro && carta.tipo != Cambio_color)
+        {
+            carta.visible = true;
+            return carta;
+        }
+        else
+        {
+            juego.mazo[juego.cartasEnMazo] = carta; // vuelve al fondo
+        }
+    }
+
+    // Si no hay ninguna válida
+    return Carta{};
+}
+
+
+void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
+{
+    ZonaVisual zona = obtenerZonaVisual();
+
+    while (!WindowShouldClose())
+    {
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+
+        if (!cantidadSeleccionada)
+        {
+            seleccionarCantidadJugadores(juego, cantidadSeleccionada);
+        }
+        else if (!nombresCompletos)
+        {
+            capturarNombresEnLaVentana(juego, jugadorActual, entradaActual, nombresCompletos);
+        }
+        else
+        {
+            // Muestra en pantalla el nombre del jugador que tiene el turno actual
+            DrawText(TextFormat("Turno de: %s", juego.jugadores[juego.turno_actual].nombre.c_str()), 800, 50, 30, RED);
+
+            if (juego.estadoDeJuego == esperando_jugadores)
+            {
+                repartirCartas(juego);
+                juego.estadoDeJuego = turno_normal;
+                juego.cartaEnJuego = cartaInicial(juego);
+                actualizarVisibilidadCartas(juego);
+            }
+
+            for (int i = 0; i < juego.cantidadJugadores; i++)
+            {
+                int y, x;
+
+                if (i < 2)
+                {
+                    y = 100; // jugadores 0 y 1 (arriba)
+                }
+
+                else
+                {
+                    y = 700; // jugadores 2 y 3 (abajo)
+                }
+
+                if (i % 2 == 0)
+                { // jugadores 0  y2 (izquierda)
+                    x = 100;
+                }
+
+                else
+                {
+                    x = 1100; // jugasores 1 y 3 (derecha)
+                }
+                bool mostrar = (i == juego.turno_actual);
+                dibujarCartasJugador(juego.jugadores[i], x, y, mostrar);
+            }
+
+            DrawRectangleRec(zona.zonaMazo, DARKGRAY);
+            DrawText("MAZO", zona.zonaMazo.x + 10, zona.zonaMazo.y + 60, 20, WHITE);
+
+            dibujarZonaDescarte(juego.cartaEnJuego, zona.xDescarte, zona.yDescarte);
+
+            Jugador &jugador = juego.jugadores[juego.turno_actual];
+
+            int y, x;
+
+            if (juego.turno_actual < 2)
+                y = 100;
+            else
+                y = 700;
+
+            if (juego.turno_actual % 2 == 0)
+                x = 100;
+            else
+                x = 1100;
+
+            for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
+            {
+                Carta &carta = jugador.mano[i];
+
+                if (!carta.visible || carta.color.empty())
+                    continue;
+
+                int cartaX = x + i * ESPACIO_X;
+                int cartaY = y;
+
+                Rectangle rect = {(float)cartaX, (float)cartaY, (float)CARTA_ANCHO, (float)CARTA_ALTO};
+
+                if (cartaTuvoDobleClick(rect) && sePuedeJugar(juego.cartaEnJuego, carta))
+                {
+                    cout << "Carta jugada: " << carta.color << ", tipo: " << carta.tipo << ", valor: " << carta.valor << endl;
+                    juego.cartaEnJuego = carta;
+                    carta = Carta{};
+                    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+                    actualizarVisibilidadCartas(juego);
+                    break;
+                }
+            }
+
+            if (CheckCollisionPointRec(GetMousePosition(), zona.zonaMazo) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                if (!tieneCartaJugable(jugador, juego.cartaEnJuego))
+                {
+                    intentarRobarYCambiarTurno(juego);
+                }
+            }
+        }
+
+        EndDrawing();
+    }
 }
 
 // Esta función dibuja en pantalla todas las cartas que un jugador tiene en su mano
@@ -226,11 +492,6 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
         // Muestra el texto o símbolo de la carta dentro del rectángulo.
         DrawText(textoCarta.c_str(), textoX, textoY, 20, colorTexto);
     }
-
-    // Dibuja el nombre del jugador sobre su fila de cartas.
-    int anchoNombre = MeasureText(jugador.nombre.c_str(), 20);
-    int nombreX = xInicial + ((MAX_CARTAS_POR_JUGADOR * espacioX) - anchoNombre / 2);
-    DrawText(jugador.nombre.c_str(), xInicial, yInicial - 30, 20, BLACK);
 }
 
 void imprimirMazo(const Juego_UNO &juego)
@@ -247,53 +508,24 @@ void imprimirMazo(const Juego_UNO &juego)
     cout << endl;
 }
 
-void seleccionarCatidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada)
-{
-    DrawText("selecciona la cantidad de jugadores: ", 100, 100, 30, DARKGRAY);
-
-    Rectangle botones[3]{
-        {100, 200, 100, 50},
-        {250, 200, 100, 50},
-        {400, 200, 100, 50}};
-
-    for (int i = 0; i < 3; i++)
-    {
-        DrawRectangleRec(botones[i], LIGHTGRAY);
-        DrawRectangleLinesEx(botones[i], 2, BLACK);                                         // esta wea es pura estetica. son contornos para rectangulos
-        DrawText(TextFormat("%d", i + 2), botones[i].x + 35, botones[i].y + 10, 30, BLACK); // el %d dice que espera un valor entero
-    }
-
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-    {
-        Vector2 mouse = GetMousePosition();
-        for (int i = 0; i < 3; i++)
-        {
-            if (CheckCollisionPointRec(mouse, botones[i]))
-            {
-                juego.cantidadJugadores = i + 2;
-                cantidadSeleccionada = true;
-            }
-        }
-    }
-}
-
 // Función para comprobar si una carta se puede jugar
 bool sePuedeJugar(Carta actual, Carta elegida)
 {
-    //
-    if(elegida.tipo == Cambio_color || elegida.tipo == Carta_Mas_cuatro || elegida.tipo == Carta_Mas_dos || elegida.tipo == Carta_Bloqueo || elegida.tipo == Cambio_direccion)
-    return true;
+    // Comodines que siempre se pueden jugar
+    if (elegida.tipo == Cambio_color || elegida.tipo == Carta_Mas_cuatro)
+        return true;
 
-    //coincide color
+    // Coincide el color
     if (elegida.color == actual.color)
-    return true;
+        return true;
 
-    //si son del mismo numero 
-    if(elegida.tipo == Numero && actual.tipo == Numero && elegida.valor == actual.valor)
-    return true;
+    // Coincide el número (para cartas numéricas)
+    if (elegida.tipo == Numero && actual.tipo == Numero && elegida.valor == actual.valor)
+        return true;
 
-    if(elegida.tipo == actual.tipo)
-    return true;
+    // Las cartas especiales solo se pueden tirar si coinciden en tipo Y color
+    if (elegida.tipo == actual.tipo && elegida.color == actual.color)
+        return true;
 
     return false;
 }
@@ -390,32 +622,12 @@ void dibujarZonaDescarte(const Carta &carta, int x, int y)
     }
 }
 
-bool jugadorRobaSiDaClick(Rectangle zonaMazo, Juego_UNO &juego, int jugador)
+// Avanza el turno respetando el sentido del juego
+void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_UNO &juego)
 {
-
-    // si se usa el mouse en la zona del mazo:
-    if (CheckCollisionPointRec(GetMousePosition(), zonaMazo) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-    {
-
-        // si aun hay cartas en el mazo Y el jugador NO ha excedido su limite de cartaw
-        if (juego.cartasEnMazo > 0)
-        {
-            Jugador &j = juego.jugadores[jugador];
-
-            // enccuentra la primra posicion libre en la baraja del jugador
-            for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
-            {
-                if (j.mano[i].color.empty())
-                {                                                 // esto es un espacio vacio
-                    j.mano[i] = juego.mazo[--juego.cartasEnMazo]; // restar uno a juego.cartasEnMazo antes de usar su valor
-                    j.mano[i].visible = true;                     // la muestra en pantalla
-                    return true;                                  // se robo correctamennte
-                }
-            }
-        }
-        return false; // que hubo un error al robar
-    }
-    return false;
+    jugadorActual = (jugadorActual + direccion + totalJugadores) % totalJugadores;
+    juego.turno_actual = jugadorActual;
+    actualizarVisibilidadCartas(juego);
 }
 
 ZonaVisual obtenerZonaVisual()
@@ -425,145 +637,4 @@ ZonaVisual obtenerZonaVisual()
     zona.xDescarte = 1100;
     zona.yDescarte = 300;
     return zona;
-}
-
-void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
-{
-    ZonaVisual zona = obtenerZonaVisual();
-
-    while (!WindowShouldClose())
-    {
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-
-        if (!cantidadSeleccionada)
-        {
-            seleccionarCatidadJugadores(juego, cantidadSeleccionada);
-        }
-        else if (!nombresCompletos)
-        {
-            capturarNombresEnLaVentana(juego, jugadorActual, entradaActual, nombresCompletos);
-        }
-        else
-        {
-            if (juego.estadoDeJuego == esperando_jugadores)
-            {
-                repartirCartas(juego);
-                juego.estadoDeJuego = turno_normal;
-                juego.cartaEnJuego = robarCartaValida(juego);
-                actualizarVisibilidadCartas(juego);
-            }
-
-            for (int i = 0; i < juego.cantidadJugadores; i++)
-            {
-                int y = 100 + i * 150;
-                bool mostrar = (i == juego.turno_actual);
-                dibujarCartasJugador(juego.jugadores[i], 100, y, mostrar);
-            }
-
-            DrawRectangleRec(zona.zonaMazo, DARKGRAY);
-            DrawText("MAZO", zona.zonaMazo.x + 10, zona.zonaMazo.y + 60, 20, WHITE);
-
-            dibujarZonaDescarte(juego.cartaEnJuego, zona.xDescarte, zona.yDescarte);
-
-            Jugador &jugador = juego.jugadores[juego.turno_actual];
-
-            for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
-            {
-                Carta &carta = jugador.mano[i];
-
-                if (!carta.visible || carta.color.empty())
-                    continue;
-
-                int x = INICIO_X + i * ESPACIO_X;
-                int y = INICIO_Y + juego.turno_actual * 150;
-
-                Rectangle rect = {(float)x, (float)y, (float)CARTA_ANCHO, (float)CARTA_ALTO};
-
-                // TEMPORALLLLL
-                DrawRectangleLines(rect.x, rect.y, rect.width, rect.height, RED);
-
-                if (cartaTuvoDobleClick(rect) && sePuedeJugar(juego.cartaEnJuego, carta))
-                {
-                    //solo para verificar que se tiro en cada turno
-                  cout << "Carta jugada: " << carta.color << ", tipo: " << carta.tipo << ", valor: " << carta.valor << endl;
-
-                    // reemplaza la carta dela mano
-                    juego.cartaEnJuego = carta;
-
-                    // elimina la carta de la mano
-                    carta = Carta{};
-
-                    // avanza el turno
-                    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
-                    actualizarVisibilidadCartas(juego);
-                    break; // solo se puede jugar una carta por turno
-                }
-            }
-            jugadorRobaSiDaClick(zona.zonaMazo, juego, juego.turno_actual);
-        }
-
-        EndDrawing();
-    }
-}
-
-Juego_UNO crearJuegoUNO()
-{
-    Juego_UNO juego;
-    juego.estadoDeJuego = esperando_jugadores;
-    juego.turno_actual = 0;
-    juego.direccion = 1;
-    return juego;
-}
-
-void iniciarVariablesEstado(bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
-{
-    cantidadSeleccionada = false;
-    jugadorActual = 0;
-    entradaActual = "";
-    nombresCompletos = false;
-}
-
-void actualizarVisibilidadCartas(Juego_UNO &juego)
-{
-    for (int i = 0; i < juego.cantidadJugadores; i++)
-    {
-        for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
-        {
-            juego.jugadores[i].mano[j].visible = (i == juego.turno_actual);
-        }
-    }
-}
-
-// Avanza el turno respetando el sentido del juego
-void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_UNO &juego)
-{
-    jugadorActual = (jugadorActual + direccion + totalJugadores) % totalJugadores;
-    juego.turno_actual = jugadorActual;
-    actualizarVisibilidadCartas(juego);
-}
-
-Carta robarCartaValida(Juego_UNO &juego)
-{
-
-    if (juego.cartasEnMazo <= 0)
-    {
-        return Carta{};
-    }
-
-    while (juego.cartasEnMazo > 0)
-    {
-        Carta carta = juego.mazo[juego.cartasEnMazo - 1]; // toma la ultima carta
-        juego.cartasEnMazo--;                             // disminuye el contador del mazo
-
-        if (sePuedeJugar(carta, juego.cartaEnJuego))
-        {
-            return carta;
-        }
-        else
-        {
-            continue;
-        }
-    }
-    return Carta{};
 }
