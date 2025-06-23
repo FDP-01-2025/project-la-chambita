@@ -400,6 +400,10 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                     cout << "Carta jugada: " << carta.color << ", tipo: " << carta.tipo << ", valor: " << carta.valor << endl;
                     juego.cartaEnJuego = carta;
                     carta = Carta{};
+                      if (verificarGanador(jugador))
+                    {
+                        juego.estadoDeJuego = juego_terminado;
+                        break;
                     avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
                     actualizarVisibilidadCartas(juego);
                     break;
