@@ -2,10 +2,23 @@
 
 #ifndef JUEGO_UNO_H // para evitar que se incluya dos veces el mismo archivo.
 #define JUEGO_UNO_H
-
+ // o donde tengas la struct
 #include <string>
 #include <iostream>
 #include "raylib.h"
+#include <string>
+using std::string;
+
+struct MensajeTemporal {
+    string texto;
+    float tiempoRestante;
+    bool activo;
+
+    MensajeTemporal() : texto(""), tiempoRestante(0), activo(false) {}
+};
+
+void ActivarMensaje(MensajeTemporal &mensaje, const string &nuevoMensaje, float duracion);
+
 
 using namespace std;
 
@@ -140,7 +153,7 @@ void actualizarEstadisticas(EstadisticasJugador& stats, bool ganoPartida, int mi
 
 //
 
-void ActivarMensaje(MensajeTemporal &mensaje, const string &nuevoMensaje, float duracion);
+
 
 struct MensajeTemporal {
   string texto;
