@@ -144,17 +144,17 @@ struct MensajeTemporal {
     MensajeTemporal() : texto(""), tiempoRestante(0), activo(false) {}
 };
 
-<<<<<<< HEAD
+
 void actualizarEstadisticas(EstadisticasJugador& stats, bool ganoPartida, int minijuegosJugadosEnPartida);
 
-=======
+
 //  Estadísticas 
 void actualizarEstadisticas(EstadisticasJugador& stats, bool ganoPartida, int minijuegosJugadosEnPartida);
 
 //  Mensajes temporales 
 void ActivarMensaje(MensajeTemporal &mensaje, const string& texto, float duracion);
 void DibujarMensaje(MensajeTemporal &mensaje, float deltaTime);
->>>>>>> db40118fa6cccd1bc860cc5e7df92455609b2a3e
+
 
 
 
