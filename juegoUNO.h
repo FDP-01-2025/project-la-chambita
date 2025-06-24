@@ -140,15 +140,14 @@ void actualizarEstadisticas(EstadisticasJugador& stats, bool ganoPartida, int mi
 
 //
 
-void ActivarMensaje(string &mensaje, const string &nuevoMensaje, float duracion);
+void ActivarMensaje(MensajeTemporal &mensaje, const string &nuevoMensaje, float duracion);
 
 struct MensajeTemporal {
-    string texto;
-    float tiempoRestante; // en segundos
-    bool activo;
-
-    MensajeTemporal() : texto(""), tiempoRestante(0), activo(false) {}
+  string texto;
+  float tiempoRestante;
+  bool activo;
 };
+
 
 void DibujarMensaje(MensajeTemporal &mensaje, float deltaTime);
 
