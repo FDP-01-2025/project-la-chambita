@@ -146,3 +146,57 @@ void turnoJugador(Juego_UNO &juego) {
     // Cambia turno al final
     avanzarTurno(juego);
 }
+
+// Guardar partida
+
+    void guardarPartida(const Jugador &jugador, const Carta &cartaActual, int turno, const std::string &guardarPartida);
+    {
+        ofstream archivo("guardar.Partida.txt");
+
+        if (!archivo.is_open())
+        {
+            cout << "Error al abrir el archivo para guardar la partida." << endl;
+            return;
+        }
+
+        archivo << "Jugador: " << jugador.nombre << endl; // Guarda nombre de jugadores
+        archivo << "Cartas en mano: " << juego.mazo[indice++] << endl;
+
+        archivo << "Mano ";
+        for (const auto &carta : jugador.mano)
+        {
+            archivo << carta.color << " " << carta.valor << "\n";
+
+        }
+
+        archivo << "Carta actual: " << cartaActual.color << " " << cartaActual.valor << "\n";
+        archivo << "Turno actual: " << juego.turno_actual << "\n";
+
+        archivo.close();
+        cout << "Partida guardada en: " << guardarPartida << endl;
+    }
+
+   // Verificar ganador
+
+    bool verificarGanador(const Jugador &jugador)
+    {
+        if (juego.mazo[indice++])
+        {
+            cout << jugador.nombre << "Has ganado la partida" << endl;
+
+            ofstream archivo("ganadores.txt", std::ios::app);
+            if (archivo.is_open())
+            {
+                archivo << "Ganador: " << jugador.nombre << "\n";
+                archivo.close();
+            }
+            else
+            {
+                cout << "No se pudo guardar el resultado en el archivo." << endl;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
