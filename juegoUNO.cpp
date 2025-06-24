@@ -324,12 +324,16 @@ Carta cartaInicial(Juego_UNO &juego)
 
 void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
 {
+    extern MensajeTemporal mensaje; // Referencia al mensaje global
+
     ZonaVisual zona = obtenerZonaVisual();
+    static int turnoPrevio = -1;  // Para controlar cuándo mostrar el mensaje
 
     while (!WindowShouldClose())
     {
         BeginDrawing();
         float deltaTime = GetFrameTime();
+
         DibujarMensaje(mensaje, deltaTime);
 
         ClearBackground(RAYWHITE);
@@ -344,7 +348,13 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
         }
         else
         {
-            // Muestra en pantalla el nombre del jugador que tiene el turno actual
+            // Activar mensaje solo cuando cambia el turno
+            if (turnoPrevio != juego.turno_actual)
+            {
+                ActivarMensaje(mensaje, "¡Turno del Jugador " + std::to_string(juego.turno_actual + 1) + "!", 2.0f);
+                turnoPrevio = juego.turno_actual;
+            }
+
             DrawText(TextFormat("Turno de: %s", juego.jugadores[juego.turno_actual].nombre.c_str()), 800, 50, 30, RED);
 
             if (juego.estadoDeJuego == esperando_jugadores)
@@ -360,24 +370,15 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                 int y, x;
 
                 if (i < 2)
-                {
-                    y = 100; // jugadores 0 y 1 (arriba)
-                }
-
+                    y = 100;
                 else
-                {
-                    y = 700; // jugadores 2 y 3 (abajo)
-                }
+                    y = 700;
 
                 if (i % 2 == 0)
-                { // jugadores 0  y2 (izquierda)
                     x = 100;
-                }
-
                 else
-                {
-                    x = 1100; // jugasores 1 y 3 (derecha)
-                }
+                    x = 1100;
+
                 bool mostrar = (i == juego.turno_actual);
                 dibujarCartasJugador(juego.jugadores[i], x, y, mostrar);
             }
@@ -389,17 +390,8 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
 
             Jugador &jugador = juego.jugadores[juego.turno_actual];
 
-            int y, x;
-
-            if (juego.turno_actual < 2)
-                y = 100;
-            else
-                y = 700;
-
-            if (juego.turno_actual % 2 == 0)
-                x = 100;
-            else
-                x = 1100;
+            int y = (juego.turno_actual < 2) ? 100 : 700;
+            int x = (juego.turno_actual % 2 == 0) ? 100 : 1100;
 
             for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
             {
@@ -415,17 +407,17 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
 
                 if (cartaTuvoDobleClick(rect) && sePuedeJugar(juego.cartaEnJuego, carta))
                 {
-                    cout << "Carta jugada: " << carta.color << ", tipo: " << carta.tipo << ", valor: " << carta.valor << endl;
+                    std::cout << "Carta jugada: " << carta.color << ", tipo: " << carta.tipo << ", valor: " << carta.valor << std::endl;
                     juego.cartaEnJuego = carta;
                     carta = Carta{};
                     if (verificarGanador(jugador))
                     {
                         juego.estadoDeJuego = juego_terminado;
                         break;
-                        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
-                        actualizarVisibilidadCartas(juego);
-                        break;
                     }
+                    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+                    actualizarVisibilidadCartas(juego);
+                    break;
                 }
 
                 if (CheckCollisionPointRec(GetMousePosition(), zona.zonaMazo) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
@@ -441,6 +433,7 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
         }
     }
 }
+
 // Esta función dibuja en pantalla todas las cartas que un jugador tiene en su mano
 void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas)
 {

@@ -1,6 +1,6 @@
 #include "raylib.h"
 #include "juegoUNO.h"
-
+extern MensajeTemporal mensaje;
 using namespace std;
 
 int main()
@@ -21,6 +21,8 @@ int main()
     iniciarVariablesEstado(cantidadSeleccionada, jugadorActual, entradaActual, nombresCompletos);
     inicializarMazo(juego);
     barajarMazo(juego);
+
+
      //  Aquí se ejecuta todo el ciclo del juego
     ejecutarJuego(juego, cantidadSeleccionada, jugadorActual, entradaActual, nombresCompletos);
 
@@ -32,7 +34,7 @@ int main()
         int minijuegosEstaPartida = 2; // o contador real
         actualizarEstadisticas(stats, jugadorGano, minijuegosEstaPartida);
     }
-    
+
     CloseWindow();
     return 0;
 }
