@@ -19,34 +19,20 @@ int main()
     bool nombresCompletos;
 
     iniciarVariablesEstado(cantidadSeleccionada, jugadorActual, entradaActual, nombresCompletos);
-
     inicializarMazo(juego);
     barajarMazo(juego);
-
+     //  Aquí se ejecuta todo el ciclo del juego
     ejecutarJuego(juego, cantidadSeleccionada, jugadorActual, entradaActual, nombresCompletos);
 
+     // ✅ Una vez que el juego termina, se actualizan estadísticas
+    if (juego.estadoDeJuego == juego_terminado)
+    {
+        EstadisticasJugador stats;
+        bool jugadorGano = true; // cambiar por lógica real si la tienes
+        int minijuegosEstaPartida = 2; // o contador real
+        actualizarEstadisticas(stats, jugadorGano, minijuegosEstaPartida);
+    }
+    
     CloseWindow();
-
-    EstadisticasJugador stats;
-
-// Simulación al terminar una partida
-bool jugadorGano = true;
-int minijuegosEstaPartida = 2;
-
-actualizarEstadisticas(stats, jugadorGano, minijuegosEstaPartida);
-
-MensajeTemporal mensaje; // global o local
-
-// Al cambiar de turno
-ActivarMensaje(mensaje, "¡Turno del Jugador 2!", 2.5f);
-
-// En el bucle principal
-float deltaTime = GetFrameTime();
-BeginDrawing();
-ClearBackground(BLACK);
-DibujarMensaje(mensaje, deltaTime);
-EndDrawing();
-
-
     return 0;
 }

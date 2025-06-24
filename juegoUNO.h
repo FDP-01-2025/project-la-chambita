@@ -134,6 +134,15 @@ struct EstadisticasJugador {
     int partidasPerdidas = 0;
     int minijuegosJugados = 0;
 };
+struct EstadisticasJugador {
+    int partidasJugadas = 0;
+    int partidasGanadas = 0;
+    int partidasPerdidas = 0;
+    int minijuegosJugados = 0;
+};
+
+// AGREGÁS ESTA LÍNEA:
+void actualizarEstadisticas(EstadisticasJugador& stats, bool ganoPartida, int minijuegosJugadosEnPartida);
 
 //
 struct MensajeTemporal {
@@ -143,6 +152,8 @@ struct MensajeTemporal {
 
     MensajeTemporal() : texto(""), tiempoRestante(0), activo(false) {}
 };
+
+void DibujarMensaje(MensajeTemporal &mensaje, float deltaTime);
 
 
 
