@@ -123,5 +123,7 @@ struct EstadisticasJugador {
 void actualizarEstadisticas(EstadisticasJugador& stats, bool ganoPartida, int minijuegosJugadosEnPartida);
 
 void DibujarMensaje(MensajeTemporal &mensaje, float deltaTime);
+bool verificarGanador(const Jugador &jugador);
+
 
 #endif // JUEGO_UNO_H
