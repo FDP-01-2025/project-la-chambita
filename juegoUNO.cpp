@@ -683,7 +683,7 @@ void DibujarMensaje(MensajeTemporal &mensaje, float deltaTime) {
         }
     }
 }
-
+/*
 MensajeTemporal mensaje; // global o dentro del scope principal
 
 // Cuando cambia el turno
@@ -700,4 +700,4 @@ DibujarMensaje(mensaje, deltaTime);
 
 EndDrawing();
 
-
+*/

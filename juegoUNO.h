@@ -141,6 +141,12 @@ struct MensajeTemporal {
     MensajeTemporal() : texto(""), tiempoRestante(0), activo(false) {}
 };
 
+//  Estadísticas 
+void actualizarEstadisticas(EstadisticasJugador& stats, bool ganoPartida, int minijuegosJugadosEnPartida);
+
+//  Mensajes temporales 
+void ActivarMensaje(MensajeTemporal &mensaje, const std::string& texto, float duracion);
+void DibujarMensaje(MensajeTemporal &mensaje, float deltaTime);
 
 
 
