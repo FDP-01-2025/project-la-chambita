@@ -4,8 +4,20 @@
 #include <algorithm>
 #include <random>
 #include <string>
+#include <sstream>
+#include <sstream> // ponelo en el .cpp donde uses la conversión
+
+std::string intToString(int valor) {
+    std::stringstream ss;
+    ss << valor;
+    return ss.str();
+}
 #include <fstream>
 #include "raylib.h"
+#include <iostream>
+using std::cout;
+using std::endl;
+using std::string;
 
 // FUNCIONES:
 // Al inicio del archivo (fuera de cualquier función)
@@ -100,11 +112,13 @@ void inicializarMazo(Juego_UNO &juego)
     juego.cartasEnMazo = indice;
 }
 
-void barajarMazo(Juego_UNO &mazo)
-{
-    random_device rd;
-    mt19937 generador(rd());
-    shuffle(mazo.mazo, mazo.mazo + mazo.cartasEnMazo, generador);
+void barajarMazo(Juego_UNO &mazo) {
+    // Creamos un generador de números aleatorios con semilla del sistema
+    std::random_device rd;
+    std::mt19937 generador(rd());
+
+    // Usamos std::shuffle para barajar el arreglo de cartas en el mazo
+    std::shuffle(mazo.mazo, mazo.mazo + mazo.cartasEnMazo, generador);
 }
 
 void seleccionarCantidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada)
@@ -471,7 +485,8 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
         switch (carta.tipo)
         {
         case Numero:
-            textoCarta = to_string(carta.valor); // convierte el valor de int a string para ponerlo en la carta
+            textoCarta = intToString(carta.valor);
+ // convierte el valor de int a string para ponerlo en la carta
             break;
         case Carta_Mas_dos:
             textoCarta = "+2";
@@ -598,7 +613,7 @@ void dibujarZonaDescarte(const Carta &carta, int x, int y)
         switch (carta.tipo)
         {
         case Numero:
-            textoCarta = to_string(carta.valor);
+            textoCarta = intToString(carta.valor);
             break;
 
         case Carta_Mas_dos:
@@ -639,7 +654,7 @@ void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_U
     actualizarVisibilidadCartas(juego);
 
     // ✅ Activar mensaje visible
-    ActivarMensaje(mensaje, "¡Turno del Jugador " + to_string(juego.turno_actual + 1) + "!", 2.0f);
+  ActivarMensaje(mensaje, "¡Turno del Jugador " + intToString(juego.turno_actual + 1) + "!", 2.0f);
 }
 
 ZonaVisual obtenerZonaVisual()
