@@ -582,21 +582,8 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
             else if (carta.color == "verde")
                 colorTexto = GREEN;
 
-<<<<<<< HEAD
-    // Guarda en archivo de texto
-    ofstream archivo("estadisticas.txt");
-    if (archivo.is_open()) {
-        archivo << "Partidas Jugadas: " << stats.partidasJugadas << '\n';
-        archivo << "Partidas Ganadas: " << stats.partidasGanadas << '\n';
-        archivo << "Partidas Perdidas: " << stats.partidasPerdidas << '\n';
-        archivo << "Minijuegos Jugados: " << stats.minijuegosJugados << '\n';
-        archivo.close();
-    }
-}
-=======
             else if (carta.color == "azul")
                 colorTexto = BLUE;
->>>>>>> db40118fa6cccd1bc860cc5e7df92455609b2a3e
 
             else if (carta.color == "negro")
                 colorTexto = DARKGRAY;
@@ -638,8 +625,6 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
         }
     }
 
-<<<<<<< HEAD
-=======
     // Avanza el turno respetando el sentido del juego
     void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_UNO &juego)
     {
@@ -701,7 +686,6 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
         {
             DrawText(mensaje.texto.c_str(), 100, 100, 30, RAYWHITE); // puedes ajustar posición/tamaño/color
             mensaje.tiempoRestante -= deltaTime;
->>>>>>> db40118fa6cccd1bc860cc5e7df92455609b2a3e
 
             if (mensaje.tiempoRestante <= 0)
             {
