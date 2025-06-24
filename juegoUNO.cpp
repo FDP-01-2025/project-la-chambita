@@ -717,3 +717,15 @@ void DibujarMensaje(MensajeTemporal &mensaje, float deltaTime)
         }
     }
 }
+
+//nuevo
+bool verificarGanador(const Jugador &jugador) {
+    // Aquí va la lógica para determinar si el jugador ganó.
+    // Por ejemplo:
+    for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++) {
+        if (jugador.mano[i].visible && !jugador.mano[i].color.empty()) {
+            return false; // Aún tiene cartas
+        }
+    }
+    return true; // No tiene cartas visibles, ganó
+}
