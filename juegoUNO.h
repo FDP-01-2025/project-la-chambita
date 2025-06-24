@@ -134,17 +134,14 @@ struct EstadisticasJugador {
     int partidasPerdidas = 0;
     int minijuegosJugados = 0;
 };
-struct EstadisticasJugador {
-    int partidasJugadas = 0;
-    int partidasGanadas = 0;
-    int partidasPerdidas = 0;
-    int minijuegosJugados = 0;
-};
 
 // AGREGÁS ESTA LÍNEA:
 void actualizarEstadisticas(EstadisticasJugador& stats, bool ganoPartida, int minijuegosJugadosEnPartida);
 
 //
+
+void ActivarMensaje(string &mensaje, const string &nuevoMensaje, float duracion);
+
 struct MensajeTemporal {
     string texto;
     float tiempoRestante; // en segundos
