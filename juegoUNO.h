@@ -7,8 +7,8 @@
 #include <iostream>
 #include "raylib.h"
 #include <string>
-using std::string;
 
+using namespace std;
 struct MensajeTemporal {
     string texto;
     float tiempoRestante;
@@ -19,9 +19,7 @@ struct MensajeTemporal {
 
 void ActivarMensaje(MensajeTemporal &mensaje, const string &nuevoMensaje, float duracion);
 
-
-using namespace std;
-
+// Definiciones de constantes
 const int MAX_JUGADORES = 4;
 const int MAX_CARTAS_POR_JUGADOR = 30;
 const int MAX_MAZO = 108;
