@@ -659,7 +659,7 @@ void actualizarEstadisticas(EstadisticasJugador& stats, bool ganoPartida, int mi
     stats.minijuegosJugados += minijuegosJugadosEnPartida;
 
     // Guarda en archivo de texto
-    std::ofstream archivo("estadisticas.txt");
+    ofstream archivo("estadisticas.txt");
     if (archivo.is_open()) {
         archivo << "Partidas Jugadas: " << stats.partidasJugadas << '\n';
         archivo << "Partidas Ganadas: " << stats.partidasGanadas << '\n';
@@ -687,21 +687,5 @@ void DibujarMensaje(MensajeTemporal &mensaje, float deltaTime) {
         }
     }
 }
-
-MensajeTemporal mensaje; // global o dentro del scope principal
-
-// Cuando cambia el turno
-ActivarMensaje(mensaje, "¡Turno del Jugador 2!", 2.5f);
-
-// Dentro del game loop
-float deltaTime = GetFrameTime();
-BeginDrawing();
-ClearBackground(BLACK);
-
-// ... otros dibujos
-
-DibujarMensaje(mensaje, deltaTime);
-
-EndDrawing();
 
 

@@ -144,6 +144,8 @@ struct MensajeTemporal {
     MensajeTemporal() : texto(""), tiempoRestante(0), activo(false) {}
 };
 
+void actualizarEstadisticas(EstadisticasJugador& stats, bool ganoPartida, int minijuegosJugadosEnPartida);
+
 
 
 

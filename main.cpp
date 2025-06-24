@@ -35,18 +35,5 @@ int minijuegosEstaPartida = 2;
 
 actualizarEstadisticas(stats, jugadorGano, minijuegosEstaPartida);
 
-MensajeTemporal mensaje; // global o local
-
-// Al cambiar de turno
-ActivarMensaje(mensaje, "¡Turno del Jugador 2!", 2.5f);
-
-// En el bucle principal
-float deltaTime = GetFrameTime();
-BeginDrawing();
-ClearBackground(BLACK);
-DibujarMensaje(mensaje, deltaTime);
-EndDrawing();
-
-
     return 0;
 }
