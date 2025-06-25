@@ -12,12 +12,12 @@ using namespace std;
 const int MAX_JUGADORES = 4;
 const int MAX_CARTAS_POR_JUGADOR = 30;
 const int MAX_MAZO = 108;
-const int CARTA_ANCHO= 80;
+const int CARTA_ANCHO = 80;
 const int CARTA_ALTO = 120;
-const int ESPACIO_X =100;
+const int ESPACIO_X = 100;
 const int ESPACIO_Y = 100;
 const int INICIO_X = 100;
-const int INICIO_Y =100;
+const int INICIO_Y = 100;
 
 // caracteristicas de los tipos de cartas
 enum tipo_de_Carta
@@ -58,7 +58,9 @@ struct Jugador
     Carta mano[MAX_CARTAS_POR_JUGADOR]; // las cartas que tiene en la mano
     int minijuegos_ganados;
     int partidas_ganadas;
+    int partidas_perdidas;
     bool esTurno;
+    bool esNuevo;
 };
 
 // caracteristicas del juego
@@ -78,9 +80,11 @@ struct Juego_UNO
     estado_de_juego estadoDeJuego;
 
     Carta cartaEnJuego;
+
+    string colorForzado;
 };
 
-//caracteristicas de las zonas visuales donde estaran las cartas
+// caracteristicas de las zonas visuales donde estaran las cartas
 struct ZonaVisual
 {
     Rectangle zonaMazo;
@@ -90,72 +94,52 @@ struct ZonaVisual
 
 // Funciones solo declaradas
 
-//inicializacion y preparacion del juego
+// inicializacion y preparacion del juego
 Juego_UNO crearJuegoUNO();
 void iniciarVariablesEstado(bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos);
 void inicializarMazo(Juego_UNO &juego);
 void barajarMazo(Juego_UNO &juego);
 
-
-//interaccion inicial con el jugador
+// interaccion inicial con el jugador
 void seleccionarCantidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada);
 void capturarNombresEnLaVentana(Juego_UNO &juego, int &jugadorActual, string &entradaActual, bool &nombresCompletos);
 
-
-//comienzo del juego
+// comienzo del juego
 void repartirCartas(Juego_UNO &juego);
 Carta robarCartaValida(Juego_UNO &juego);
 void actualizarVisibilidadCartas(Juego_UNO &juego);
 
-
-//logica y turnos de jugabilidad
+// logica y turnos de jugabilidad
 void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos);
 void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas);
 void dibujarZonaDescarte(const Carta &carta, int x, int y);
-bool jugadorRobaSiClick(const Rectangle& zonaMazo, Juego_UNO &juego, int jugador);
+bool jugadorRobaSiClick(const Rectangle &zonaMazo, Juego_UNO &juego, int jugador);
 bool sePuedeJugar(Carta actual, Carta elegida);
-bool tieneCartaJugable(const Jugador &jugador,Carta cartaEnjuego);
+bool tieneCartaJugable(const Jugador &jugador, Carta cartaEnjuego);
 void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_UNO &juego);
 bool cartaTuvoDobleClick(const Rectangle &rect);
 void intentarRobarYCambiarTurno(Juego_UNO &juego);
-Carta cartaInicial(Juego_UNO &juego );
-void guardarPartida(const Jugador &jugador, const Carta &cartaActual, int turno, const string &guardarPartida);
-bool verificarGanador(const Jugador &jugador);
+Carta cartaInicial(Juego_UNO &juego);
+void guardarEstadisticas(const Juego_UNO &juego, const string &EstadisticaArchivo);
+bool ejecutarMinijuegoReflejos(Juego_UNO &juego);
+void aplicarMasDos(Juego_UNO &juego, int objetivo);
+void aplicarMasCuatro(Juego_UNO &juego);
+void aplicarCambioColor(Juego_UNO &juego);
+void aplicarBloqueo(Juego_UNO &juego);
+void aplicarCambioDireccion(Juego_UNO &juego);
+void aplicarMasDosConMinijuego(Juego_UNO &juego, int jugadorPenalizado, int jugadorComodin);
 
 
-//funciones de utilidad grafica
+// funciones de utilidad grafica
 ZonaVisual obtenerZonaVisual();
 
-
-//estructuras de estadisticas del jugador
-struct EstadisticasJugador {
+// estructuras de estadisticas del jugador
+struct EstadisticasJugador
+{
     int partidasJugadas = 0;
     int partidasGanadas = 0;
     int partidasPerdidas = 0;
     int minijuegosJugados = 0;
 };
-
-//
-struct MensajeTemporal {
-    string texto;
-    float tiempoRestante; // en segundos
-    bool activo;
-
-    MensajeTemporal() : texto(""), tiempoRestante(0), activo(false) {}
-};
-
-
-void actualizarEstadisticas(EstadisticasJugador& stats, bool ganoPartida, int minijuegosJugadosEnPartida);
-
-
-//  Estadísticas 
-void actualizarEstadisticas(EstadisticasJugador& stats, bool ganoPartida, int minijuegosJugadosEnPartida);
-
-//  Mensajes temporales 
-void ActivarMensaje(MensajeTemporal &mensaje, const string& texto, float duracion);
-void DibujarMensaje(MensajeTemporal &mensaje, float deltaTime);
-
-
-
 
 #endif
