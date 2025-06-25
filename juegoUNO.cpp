@@ -619,3 +619,30 @@ ZonaVisual obtenerZonaVisual()
     zona.yDescarte = 300;
     return zona;
 }
+// Funcion para que se guarde los nombres del jugador y las partidas ganadas y perdidas
+
+void guardarEstadisticas(const Juego_UNO &juego, const string &EstadisticaArchivo)
+{
+    ofstream archivo(EstadisticaArchivo, ios::app); // <- corrección aquí
+
+    if (!archivo.is_open())
+    {
+        cout << "Error al abrir el archivo para guardar estadísticas." << endl;
+        return;
+    }
+
+    archivo << "----- Resultados de la partida -----" << endl;
+
+    for (int i = 0; i < juego.cantidadJugadores; ++i)
+    {
+        const Jugador &jugador = juego.jugadores[i];
+        archivo << "Jugador: " << jugador.nombre << endl;
+        archivo << "  Partidas ganadas: " << jugador.partidas_ganadas << endl;
+        archivo << "  Partidas perdidas: " << jugador.partidas_perdidas << endl;
+        archivo << "  Minijuegos ganados: " << jugador.minijuegos_ganados << endl;
+        archivo << "-----------------------------------" << endl;
+    }
+
+    archivo.close();
+    cout << "Estadísticas guardadas en " << EstadisticaArchivo << endl;
+}
