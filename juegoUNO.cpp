@@ -646,3 +646,106 @@ void guardarEstadisticas(const Juego_UNO &juego, const string &EstadisticaArchiv
     archivo.close();
     cout << "Estadísticas guardadas en " << EstadisticaArchivo << endl;
 }
+bool ejecutarMinijuegoReflejos(Juego_UNO &juego)
+{
+    float tiempoLimite = 3.0f; // 3 segundos para reaccionar
+    float tiempoTranscurrido = 0.0f;
+    char teclaCorrecta = 'A' + GetRandomValue(0, 25); // Tecla aleatoria entre A-Z
+
+    while (!WindowShouldClose() && tiempoTranscurrido < tiempoLimite)
+    {
+        float deltaTime = GetFrameTime();
+        tiempoTranscurrido += deltaTime;
+
+        BeginDrawing();
+        ClearBackground(BLACK);
+
+        DrawText("¡MINIJUEGO DE REFLEJOS!", 600, 200, 40, YELLOW);
+        DrawText(TextFormat("Presiona la tecla: %c", teclaCorrecta), 600, 300, 30, LIGHTGRAY);
+        DrawText(TextFormat("Tiempo restante: %.2f", tiempoLimite - tiempoTranscurrido), 600, 400, 25, RED);
+
+        EndDrawing();
+
+        if (IsKeyPressed((int)teclaCorrecta))
+        {
+            // Ganó -> rival recibe +2
+            int rival = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
+
+            for (int i = 0; i < 2; i++)
+            {
+                Carta nueva = robarCartaValida(juego);
+                for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+                {
+                    if (juego.jugadores[rival].mano[j].color.empty())
+                    {
+                        juego.jugadores[rival].mano[j] = nueva;
+                        break;
+                    }
+                }
+            }
+
+            return true;
+        }
+    }
+
+    // Perdió -> jugador que lanzó el comodín se castiga con +2
+    int castigado = juego.turno_actual;
+    for (int i = 0; i < 2; i++)
+    {
+        Carta nueva = robarCartaValida(juego);
+        for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+        {
+            if (juego.jugadores[castigado].mano[j].color.empty())
+            {
+                juego.jugadores[castigado].mano[j] = nueva;
+                break;
+            }
+        }
+    }
+
+    return false;
+}
+
+void aplicarMasDosConMinijuego(Juego_UNO &juego, int jugadorPenalizado, int jugadorComodin)
+{
+    bool ganoMinijuego = ejecutarMinijuegoReflejos(juego);
+
+    if (ganoMinijuego)
+    {
+        // El jugador penalizado roba 2 cartas
+        for (int i = 0; i < 2; i++)
+        {
+            Carta cartaRobada = robarCartaValida(juego);
+            if (!cartaRobada.color.empty())
+            {
+                for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+                {
+                    if (juego.jugadores[jugadorPenalizado].mano[j].color.empty())
+                    {
+                        juego.jugadores[jugadorPenalizado].mano[j] = cartaRobada;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        // El jugador que tiró el +2 (comodín) roba las 2 cartas (castigo)
+        for (int i = 0; i < 2; i++)
+        {
+            Carta cartaRobada = robarCartaValida(juego);
+            if (!cartaRobada.color.empty())
+            {
+                for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+                {
+                    if (juego.jugadores[jugadorComodin].mano[j].color.empty())
+                    {
+                        juego.jugadores[jugadorComodin].mano[j] = cartaRobada;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
