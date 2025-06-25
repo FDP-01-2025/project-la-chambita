@@ -338,27 +338,9 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
 
             for (int i = 0; i < juego.cantidadJugadores; i++)
             {
-                int y, x;
+                int y = (i < 2) ? 100 : 700;       // jugadores 0 y 1 arriba, 2 y 3 abajo
+                int x = (i % 2 == 0) ? 100 : 1100; // jugadores 0 y 2 izquierda, 1 y 3 derecha
 
-                if (i < 2)
-                {
-                    y = 100; // jugadores 0 y 1 (arriba)
-                }
-
-                else
-                {
-                    y = 700; // jugadores 2 y 3 (abajo)
-                }
-
-                if (i % 2 == 0)
-                { // jugadores 0  y2 (izquierda)
-                    x = 100;
-                }
-
-                else
-                {
-                    x = 1100; // jugasores 1 y 3 (derecha)
-                }
                 bool mostrar = (i == juego.turno_actual);
                 dibujarCartasJugador(juego.jugadores[i], x, y, mostrar);
             }
@@ -370,17 +352,8 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
 
             Jugador &jugador = juego.jugadores[juego.turno_actual];
 
-            int y, x;
-
-            if (juego.turno_actual < 2)
-                y = 100;
-            else
-                y = 700;
-
-            if (juego.turno_actual % 2 == 0)
-                x = 100;
-            else
-                x = 1100;
+            int y = (juego.turno_actual < 2) ? 100 : 700;
+            int x = (juego.turno_actual % 2 == 0) ? 100 : 1100;
 
             for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
             {
@@ -397,46 +370,62 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                 if (cartaTuvoDobleClick(rect) && sePuedeJugar(juego.cartaEnJuego, carta))
                 {
                     cout << "Carta jugada: " << carta.color << ", tipo: " << carta.tipo << ", valor: " << carta.valor << endl;
-                    juego.cartaEnJuego = carta;
-                    carta = Carta{};
-                    if (verificarGanador(jugador))
-                    {
-                        juego.estadoDeJuego = juego_terminado;
-                        break;
-                        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
-                        actualizarVisibilidadCartas(juego);
-                        break;
-                    }
-                }
 
-                if (CheckCollisionPointRec(GetMousePosition(), zona.zonaMazo) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-                {
-                    if (!tieneCartaJugable(jugador, juego.cartaEnJuego))
+                    juego.cartaEnJuego = carta;
+
+                    if (carta.tipo == Carta_Mas_dos)
                     {
-                        intentarRobarYCambiarTurno(juego);
+                        int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
+                        aplicarMasDosConMinijuego(juego, jugadorPenalizado, juego.turno_actual);
                     }
+
+                    carta = Carta{}; // Vaciar carta jugada de la mano
+                    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+                    actualizarVisibilidadCartas(juego);
+                    break;
                 }
             }
 
-            EndDrawing();
+            if (CheckCollisionPointRec(GetMousePosition(), zona.zonaMazo) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                if (!tieneCartaJugable(jugador, juego.cartaEnJuego))
+                {
+                    intentarRobarYCambiarTurno(juego);
+                }
+            }
         }
+
+        EndDrawing();
     }
 }
 
+// Esta función dibuja en pantalla todas las cartas que un jugador tiene en su mano
 void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas)
 {
+
+    // esto defne el espcio horizontal entre una carta y otra para que no se encimen.
     int espacioX = 100;
+
+    // Recorre cada carta de la mano del jugador.
     for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
     {
         if (!mostrarTodas && !jugador.mano[i].visible)
-            continue;
+            continue; // continue: omitir la iteración actual del bucle y pasar a la siguiente iteración.
+
         const Carta &carta = jugador.mano[i];
+
         if (carta.color.empty())
             continue;
+
+        /*Calcula la posición de cada carta en el eje X (horizontal) sumando el espacio entre cartas.
+        El eje Y permanece fijo para que todas las cartas estén alineadas en fila*/
         int x = xInicial + i * ESPACIO_X;
         int y = yInicial;
+
         DrawRectangle(x, y, CARTA_ANCHO, CARTA_ALTO, LIGHTGRAY);
         DrawRectangleLines(x, y, CARTA_ANCHO, CARTA_ALTO, BLACK);
+
+        // Se decide el color con el que se dibujará el texto dentro de la carta, según el color de la carta UNO.
         Color colorTexto = BLACK;
         if (carta.color == "rojo")
             colorTexto = RED;
@@ -448,11 +437,13 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
             colorTexto = BLUE;
         else if (carta.color == "negro")
             colorTexto = DARKGRAY;
+
+        // Aquí se traduce el tipo de carta a un texto (o emoji) que aparecerá dentro del rectángulo. se pasa a to string
         string textoCarta;
         switch (carta.tipo)
         {
         case Numero:
-            textoCarta = to_string(carta.valor);
+            textoCarta = to_string(carta.valor); // convierte el valor de int a string para ponerlo en la carta
             break;
         case Carta_Mas_dos:
             textoCarta = "+2";
@@ -473,9 +464,13 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
             textoCarta = "?";
             break;
         }
+
+        // centra el texto horizontalmente en la carta
         int anchoTexto = MeasureText(textoCarta.c_str(), 20);
         int textoX = x + (80 / 2) - (anchoTexto / 2);
         int textoY = y + 50;
+
+        // Muestra el texto o símbolo de la carta dentro del rectángulo.
         DrawText(textoCarta.c_str(), textoX, textoY, 20, colorTexto);
     }
 }
@@ -494,16 +489,25 @@ void imprimirMazo(const Juego_UNO &juego)
     cout << endl;
 }
 
+// Función para comprobar si una carta se puede jugar
 bool sePuedeJugar(Carta actual, Carta elegida)
 {
+    // Comodines que siempre se pueden jugar
     if (elegida.tipo == Cambio_color || elegida.tipo == Carta_Mas_cuatro)
         return true;
+
+    // Coincide el color
     if (elegida.color == actual.color)
         return true;
+
+    // Coincide el número (para cartas numéricas)
     if (elegida.tipo == Numero && actual.tipo == Numero && elegida.valor == actual.valor)
         return true;
+
+    // Las cartas especiales solo se pueden tirar si coinciden en tipo Y color
     if (elegida.tipo == actual.tipo && elegida.color == actual.color)
         return true;
+
     return false;
 }
 
@@ -511,13 +515,14 @@ bool cartaTuvoDobleClick(const Rectangle &rect)
 {
     static float tiempoUltimoClick = 0;
     static int clicks = 0;
+
     if (CheckCollisionPointRec(GetMousePosition(), rect))
     {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
         {
             float tiempoActual = GetTime();
             if (tiempoActual - tiempoUltimoClick < 0.3f)
-            {
+            { // 0.3 (segundos) f(porque es valor float)
                 clicks++;
                 if (clicks == 2)
                 {
@@ -544,46 +549,61 @@ void dibujarZonaDescarte(const Carta &carta, int x, int y)
     {
         DrawRectangle(x, y, 80, 120, LIGHTGRAY);
         DrawRectangleLines(x, y, 80, 120, BLACK);
+
         Color colorTexto = BLACK;
         if (carta.color == "rojo")
             colorTexto = RED;
+
         else if (carta.color == "amarillo")
             colorTexto = YELLOW;
+
         else if (carta.color == "verde")
             colorTexto = GREEN;
+
         else if (carta.color == "azul")
             colorTexto = BLUE;
+
         else if (carta.color == "negro")
             colorTexto = DARKGRAY;
+
         string textoCarta;
         switch (carta.tipo)
         {
         case Numero:
             textoCarta = to_string(carta.valor);
             break;
+
         case Carta_Mas_dos:
             textoCarta = "+2";
             break;
+
         case Carta_Mas_cuatro:
             textoCarta = "+4";
             break;
+
         case Cambio_direccion:
             textoCarta = "Rev";
             break;
+
         case Carta_Bloqueo:
             textoCarta = "bloqueo";
             break;
+
         case Cambio_color:
             textoCarta = "Color?";
             break;
+
         default:
             textoCarta = "?";
             break;
         }
+
+        // esto dibuja el texto en la carta (casi centrado xd)
         DrawText(textoCarta.c_str(), x + 30, y + 50, 30, colorTexto);
     }
 }
 
+// Avanza el turno respetando el sentido del juego
 void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_UNO &juego)
 {
     jugadorActual = (jugadorActual + direccion + totalJugadores) % totalJugadores;
@@ -598,47 +618,4 @@ ZonaVisual obtenerZonaVisual()
     zona.xDescarte = 1100;
     zona.yDescarte = 300;
     return zona;
-}
-
-void actualizarEstadisticas(EstadisticasJugador &stats, bool ganoPartida, int minijuegosJugadosEnPartida)
-{
-    stats.partidasJugadas++;
-    if (ganoPartida)
-    {
-        stats.partidasGanadas++;
-    }
-    else
-    {
-        stats.partidasPerdidas++;
-    }
-    stats.minijuegosJugados += minijuegosJugadosEnPartida;
-    std::ofstream archivo("estadisticas.txt");
-    if (archivo.is_open())
-    {
-        archivo << "Partidas Jugadas: " << stats.partidasJugadas << '\n';
-        archivo << "Partidas Ganadas: " << stats.partidasGanadas << '\n';
-        archivo << "Partidas Perdidas: " << stats.partidasPerdidas << '\n';
-        archivo << "Minijuegos Jugados: " << stats.minijuegosJugados << '\n';
-        archivo.close();
-    }
-}
-
-void ActivarMensaje(MensajeTemporal &mensaje, const string &texto, float duracion)
-{
-    mensaje.texto = texto;
-    mensaje.tiempoRestante = duracion;
-    mensaje.activo = true;
-}
-
-void DibujarMensaje(MensajeTemporal &mensaje, float deltaTime)
-{
-    if (mensaje.activo)
-    {
-        DrawText(mensaje.texto.c_str(), 100, 100, 30, RAYWHITE);
-        mensaje.tiempoRestante -= deltaTime;
-        if (mensaje.tiempoRestante <= 0)
-        {
-            mensaje.activo = false;
-        }
-    }
 }
