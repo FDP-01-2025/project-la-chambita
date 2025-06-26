@@ -7,6 +7,7 @@
 #include <string>
 #include <fstream>
 #include "raylib.h"
+#include "minijuego_Palabra.h"
 
 // ======================= FUNCIONES PRINCIPALES DEL JUEGO =======================
 
@@ -19,6 +20,9 @@ Juego_UNO crearJuegoUNO()
     juego.direccion = 1;
     return juego;
 }
+
+// Declaración global o al inicio de la función principal
+Vector2 posicionMinijuego = {100.0f, 50.0f}; // Ajusta las coordenadas a tu gusto
 
 // Inicializa variables de estado para la selección de jugadores y nombres.
 void iniciarVariablesEstado(bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
@@ -128,7 +132,7 @@ void seleccionarCantidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada)
     for (int i = 0; i < 3; i++)
     {
         DrawRectangleRec(botones[i], LIGHTGRAY);
-        DrawRectangleLinesEx(botones[i], 2, BLACK); // Contorno de los botones
+        DrawRectangleLinesEx(botones[i], 2, BLACK);                                         // Contorno de los botones
         DrawText(TextFormat("%d", i + 2), botones[i].x + 35, botones[i].y + 10, 30, BLACK); // Texto del botón
     }
 
@@ -323,6 +327,7 @@ Carta cartaInicial(Juego_UNO &juego)
 // Bucle principal del juego: gestiona el flujo de pantallas y turnos.
 void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
 {
+    // temporal
     ZonaVisual zona = obtenerZonaVisual();
 
     while (!WindowShouldClose())
@@ -391,14 +396,20 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
 
                     juego.cartaEnJuego = carta;
 
-                    // Si la carta es +2, activa el minijuego de reflejos
                     if (carta.tipo == Carta_Mas_dos)
                     {
                         int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
                         aplicarMasDosConMinijuego(juego, jugadorPenalizado, juego.turno_actual);
                     }
+                    else if (carta.tipo == Cambio_color)
+                    {
+                        cout << "¡Comodín de cambio de color jugado!" << endl;
 
-                    carta = Carta{}; // Elimina la carta jugada de la mano
+                        iniciarOrdenaPalabra();
+                        juego.estadoDeJuego = minijuego_activo;
+                        juego.cartaPendiente = carta; // Guarda la carta temporalmente
+                    }
+                    carta = Carta{};
                     avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
                     actualizarVisibilidadCartas(juego);
                     break;
@@ -439,6 +450,85 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                     return;
                 }
             }
+        }
+
+        // ✅ BLOQUE INDEPENDIENTE PARA EL MINIJUEGO DE ORDENAR PALABRA
+        if (juego.estadoDeJuego == minijuego_activo)
+        {
+            DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLACK);
+            actualizarMinijuegoOrdenaPalabra(juego.jugadores[juego.turno_actual]);
+
+            if (minijuegoOrdenaTerminado())
+            {
+                if (IsKeyPressed(KEY_ENTER))
+                {
+                    if (minijuegoOrdenaGano())
+                    {
+                        juego.cartaEnJuego = juego.cartaPendiente; // ✅ Descarta la carta
+                    }
+                    else
+                    {
+                        // ❌ Penalización: el siguiente jugador roba 4 cartas
+                        int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
+
+                        for (int i = 0; i < 4; i++)
+                        {
+                            Carta cartaRobada = robarCartaValida(juego);
+                            if (!cartaRobada.color.empty())
+                            {
+                                for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+                                {
+                                    if (juego.jugadores[jugadorPenalizado].mano[j].color.empty())
+                                    {
+                                        juego.jugadores[jugadorPenalizado].mano[j] = cartaRobada;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 🎨 Color aleatorio para carta de cambio de color
+                    int colorIndex = rand() % 4;
+                    switch (colorIndex)
+                    {
+                    case 0:
+                        juego.cartaEnJuego.color = "rojo";
+                        break;
+                    case 1:
+                        juego.cartaEnJuego.color = "azul";
+                        break;
+                    case 2:
+                        juego.cartaEnJuego.color = "verde";
+                        break;
+                    case 3:
+                        juego.cartaEnJuego.color = "amarillo";
+                        break;
+                    }
+                    // Salir del minijuego y volver al juego normal
+                    juego.estadoDeJuego = turno_normal;
+
+                    // Limpia la carta jugada de la mano
+                    for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
+                    {
+                        if (juego.jugadores[juego.turno_actual].mano[i].color == juego.cartaEnJuego.color &&
+                            juego.jugadores[juego.turno_actual].mano[i].tipo == juego.cartaEnJuego.tipo &&
+                            juego.jugadores[juego.turno_actual].mano[i].valor == juego.cartaEnJuego.valor)
+                        {
+                            juego.jugadores[juego.turno_actual].mano[i] = Carta{};
+                            break;
+                        }
+                    }
+
+                    // 🔁 Continuar juego normalmente
+                    juego.estadoDeJuego = turno_normal;
+                    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+                    actualizarVisibilidadCartas(juego);
+                }
+            }
+
+            EndDrawing(); // ❗ Ya se dibujó todo lo del minijuego, cerramos frame
+            continue;     // ⛔ Saltamos el resto del ciclo para no sobreescribir la pantalla
         }
 
         EndDrawing();
@@ -680,7 +770,7 @@ void guardarEstadisticas(const Juego_UNO &juego, const string &EstadisticaArchiv
     cout << "Estadísticas guardadas en " << EstadisticaArchivo << endl;
 }
 
-//MINIJUEGO DE REFLEJOS PARA CARTA +2
+// MINIJUEGO DE REFLEJOS PARA CARTA +2
 
 // Ejecuta un minijuego de reflejos: el jugador debe presionar una tecla aleatoria rápidamente.
 // Si gana, el rival roba 2 cartas. Si pierde, el jugador que lanzó el +2 roba 2 cartas.
@@ -794,10 +884,10 @@ bool jugadorSinCartas(const Jugador &jugador)
 {
     for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
     {
-        if (!jugador.mano[i].color.empty()) {
+        if (!jugador.mano[i].color.empty())
+        {
             return false; // Tiene al menos una carta real
         }
     }
     return true; // No tiene cartas
 }
-

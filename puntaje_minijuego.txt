@@ -1,0 +1,24 @@
+Palabra: computadora
+Intentos: 1
+Resultado: GANASTE
+----------------------
+Palabra: algoritmo
+Intentos: 2
+Resultado: GANASTE
+----------------------
+Palabra: variable
+Intentos: 1
+Resultado: GANASTE
+----------------------
+Palabra: algoritmo
+Intentos: 1
+Resultado: GANASTE
+----------------------
+Palabra: algoritmo
+Intentos: 1
+Resultado: GANASTE
+----------------------
+Palabra: computadora
+Intentos: 1
+Resultado: GANASTE
+----------------------

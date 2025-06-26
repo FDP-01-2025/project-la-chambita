@@ -1,9 +1,25 @@
+// minijuego_Palabra.cpp refactorizado
 #include "raylib.h"
 #include <string>
 #include <ctime>
 #include <fstream>
+#include "juegoUNO.h"
+#include <cstring>
 
-// Función para guardar resultados en archivo
+// Estado interno del minijuego
+static bool iniciado = false;
+static bool terminado = false;
+static bool gano = false;
+static int intentoLen = 0;
+static int intentos = 0;
+static const int maxIntentos = 3;
+static char intentoUsuario[20] = {0};
+static char palabraOriginal[20];
+static char palabraMezclada[20];
+static int longitud = 0;
+static int framesDesdeInicio = 0;
+
+// Guardar puntaje
 void guardarPuntaje(const std::string &palabra, int intentos)
 {
     std::ofstream archivo("puntaje_minijuego.txt", std::ios::app);
@@ -17,7 +33,7 @@ void guardarPuntaje(const std::string &palabra, int intentos)
     }
 }
 
-// Función para mezclar palabra con algoritmo Fisher-Yates
+// Mezclar palabra (Fisher-Yates)
 void mezclarPalabra(char palabra[], int length)
 {
     for (int i = length - 1; i > 0; i--)
@@ -29,184 +45,102 @@ void mezclarPalabra(char palabra[], int length)
     }
 }
 
-// Función principal del minijuego
-bool jugarOrdenaPalabra()
+// Inicializar minijuego
+void iniciarOrdenaPalabra()
 {
-    InitWindow(800, 450, "Minijuego: Ordenar la palabra");
-    SetTargetFPS(60);
+    const char *palabras[] = {"computadora", "programacion", "algoritmo", "variable", "funcion"};
+    int indice = rand() % 5;
 
-    // Cargar imagen de fondo
-    Texture2D fondo = LoadTexture("wallpapper1.png");
-
-    const int TOTAL_PALABRAS = 5;
-    const char palabras[TOTAL_PALABRAS][20] = {
-        "computadora",
-        "programacion",
-        "algoritmo",
-        "variable",
-        "funcion"};
-
-    srand(time(0));
-    int indice = rand() % TOTAL_PALABRAS;
-
-    char palabraOriginal[20];
-    int longitud = 0;
-    while (palabras[indice][longitud] != '\0' && longitud < 19)
-    {
-        palabraOriginal[longitud] = palabras[indice][longitud];
-        longitud++;
-    }
-    palabraOriginal[longitud] = '\0';
-
-    char palabraMezclada[20];
-    for (int i = 0; i <= longitud; i++)
-    {
-        palabraMezclada[i] = palabraOriginal[i];
-    }
-
+    strcpy(palabraOriginal, palabras[indice]);
+    longitud = strlen(palabraOriginal);
+    strcpy(palabraMezclada, palabraOriginal);
     mezclarPalabra(palabraMezclada, longitud);
 
-    char intentoUsuario[20] = {0};
-    int intentoLen = 0;
+    intentoLen = 0;
+    intentoUsuario[0] = '\0';
+    intentos = 0;
+    terminado = false;
+    gano = false;
+    iniciado = true;
+    framesDesdeInicio = 0;
+}
 
-    int intentos = 0;
-    const int maxIntentos = 3;
+// Actualizar lógica y dibujar minijuego
+void actualizarMinijuegoOrdenaPalabra(Jugador &jugador)
+{
+    // Posición centrada para el texto y la palabra
+    int centerX = GetScreenWidth() / 2;
+    int centerY = GetScreenHeight() / 2;
 
-    bool juegoTerminado = false;
-    bool gano = false;
 
-    const int anchoVentana = 800;
+    framesDesdeInicio++;
+    if (!iniciado)
+        return;
 
-    while (!WindowShouldClose() && !juegoTerminado)
+    // Entrada de texto
+    int key = GetCharPressed();
+    if (key > 0 && intentoLen < longitud)
     {
-        int key = GetCharPressed();
-        if (key > 0)
-        {
-            if ((key >= 32) && (key <= 125) && intentoLen < longitud)
-            {
-                intentoUsuario[intentoLen] = (char)key;
-                intentoLen++;
-                intentoUsuario[intentoLen] = '\0';
-            }
-        }
-
-        if (IsKeyPressed(KEY_BACKSPACE) && intentoLen > 0)
-        {
-            intentoLen--;
-            intentoUsuario[intentoLen] = '\0';
-        }
-
-        if (IsKeyPressed(KEY_ENTER))
-        {
-            intentos++;
-
-            bool iguales = true;
-            for (int i = 0; i < longitud; i++)
-            {
-                if (intentoUsuario[i] != palabraOriginal[i])
-                {
-                    iguales = false;
-                    break;
-                }
-            }
-
-            if (iguales)
-            {
-                gano = true;
-                juegoTerminado = true;
-                guardarPuntaje(palabraOriginal, intentos);
-            }
-            else
-            {
-                if (intentos >= maxIntentos)
-                {
-                    juegoTerminado = true;
-                }
-                else
-                {
-                    intentoLen = 0;
-                    intentoUsuario[0] = '\0';
-                }
-            }
-        }
-
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-
-        // Escalar fondo para cubrir ventana y poner transparencia
-        float escalaX = 800.0f / fondo.width;
-        float escalaY = 450.0f / fondo.height;
-        Color colorFondo = {255, 255, 255, 100}; // transparencia 100/255
-        DrawTextureEx(fondo, (Vector2){0, 0}, 0.0f, escalaX, colorFondo);
-
-        // Centrando textos
-        const char *textoPrincipal = "Ordena la palabra:";
-        int anchoTextoPrincipal = MeasureText(textoPrincipal, 20);
-        int xTextoPrincipal = (anchoVentana - anchoTextoPrincipal) / 2;
-
-        int anchoPalabraMezclada = MeasureText(palabraMezclada, 40);
-        int xPalabraMezclada = (anchoVentana - anchoPalabraMezclada) / 2;
-
-        const char *textoIntento = "Tu intento:";
-        int anchoTextoIntento = MeasureText(textoIntento, 20);
-        int xTextoIntento = (anchoVentana - anchoTextoIntento) / 2;
-
-        int anchoIntentoUsuario = MeasureText(intentoUsuario, 40);
-        int xIntentoUsuario = (anchoVentana - anchoIntentoUsuario) / 2;
-
-        char textoIntentos[50];
-        sprintf(textoIntentos, "Intentos: %d / %d", intentos, maxIntentos);
-        int anchoTextoIntentos = MeasureText(textoIntentos, 20);
-        int xTextoIntentos = (anchoVentana - anchoTextoIntentos) / 2;
-
-        DrawText(textoPrincipal, xTextoPrincipal, 20, 20, DARKGRAY);
-        DrawText(palabraMezclada, xPalabraMezclada, 60, 40, BLUE);
-        DrawText(textoIntento, xTextoIntento, 130, 20, DARKGRAY);
-        DrawText(intentoUsuario, xIntentoUsuario, 160, 40, DARKGREEN);
-        DrawText(textoIntentos, xTextoIntentos, 220, 20, DARKGRAY);
-
-        EndDrawing();
+        intentoUsuario[intentoLen++] = (char)key;
+        intentoUsuario[intentoLen] = '\0';
+    }
+    if (IsKeyPressed(KEY_BACKSPACE) && intentoLen > 0)
+    {
+        intentoLen--;
+        intentoUsuario[intentoLen] = '\0';
     }
 
-    // Mostrar resultado 5 segundos antes de cerrar ventana
-    double tiempoInicio = GetTime();
-    while (!WindowShouldClose() && (GetTime() - tiempoInicio < 5.0))
+    if (IsKeyPressed(KEY_ENTER))
     {
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
+        intentos++;
+        bool iguales = strcmp(intentoUsuario, palabraOriginal) == 0;
 
-        // Mismo fondo con transparencia
-        float escalaX = 800.0f / fondo.width;
-        float escalaY = 450.0f / fondo.height;
-        Color colorFondo = {255, 255, 255, 100};
-        DrawTextureEx(fondo, (Vector2){0, 0}, 0.0f, escalaX, colorFondo);
-
-        if (gano)
+        if (iguales)
         {
-            const char *textoGano = "¡Correcto! Has ganado.";
-            int anchoGano = MeasureText(textoGano, 30);
-            int xGano = (anchoVentana - anchoGano) / 2;
-            DrawText(textoGano, xGano, 330, 30, DARKGREEN);
+            gano = true;
+            terminado = true;
+            guardarPuntaje(palabraOriginal, intentos);
+        }
+        else if (intentos >= maxIntentos)
+        {
+            terminado = true;
         }
         else
         {
-            const char *textoPerdio = "Se acabaron los intentos.";
-            int anchoPerdio = MeasureText(textoPerdio, 30);
-            int xPerdio = (anchoVentana - anchoPerdio) / 2;
-            DrawText(textoPerdio, xPerdio, 350, 30, RED);
-
-            char textoPalabra[50];
-            sprintf(textoPalabra, "La palabra era: %s", palabraOriginal);
-            int anchoPalabra = MeasureText(textoPalabra, 20);
-            int xPalabra = (anchoVentana - anchoPalabra) / 2;
-            DrawText(textoPalabra, xPalabra, 330, 20, DARKGRAY);
+            intentoLen = 0;
+            intentoUsuario[0] = '\0';
         }
-
-        EndDrawing();
     }
 
-    UnloadTexture(fondo);
-    CloseWindow();
+    DrawText("Ordena la palabra:", 250, 50, 20, DARKGRAY);
+    DrawText(palabraMezclada, 300, 100, 40, BLUE);
+    DrawText("Tu intento:", 270, 160, 20, DARKGRAY);
+    DrawText(intentoUsuario, 300, 190, 40, DARKGREEN);
 
+    char textoIntentos[50];
+    sprintf(textoIntentos, "Intentos: %d / %d", intentos, maxIntentos);
+    DrawText(textoIntentos, 270, 250, 20, DARKGRAY);
+
+    if (terminado && framesDesdeInicio > 1)
+    {
+        DrawText(gano ? "¡Correcto!" : "Fallaste", 330, 300, 30, gano ? DARKGREEN : RED);
+        DrawText("Presiona ENTER para continuar", 250, 350, 20, BLACK);
+
+        if (IsKeyPressed(KEY_ENTER))
+        {
+            iniciado = false;
+        }
+    }
+}
+
+// Verificar si ya terminó
+bool minijuegoOrdenaTerminado()
+{
+    return terminado;
+}
+
+// Verificar si ganó
+bool minijuegoOrdenaGano()
+{
     return gano;
 }

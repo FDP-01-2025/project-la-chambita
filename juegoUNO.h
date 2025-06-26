@@ -27,9 +27,9 @@ enum tipo_de_Carta
     Numero,           // Carta con valor numérico
     Carta_Mas_dos,    // Carta +2: el siguiente jugador roba dos cartas
     Carta_Mas_cuatro, // Carta +4: el siguiente jugador roba cuatro cartas y cambia color
-    Cambio_color,     // Cambia el color actual del juego
+    Cambio_color,    // Cambia el color actual del juego
     Cambio_direccion, // Invierte el sentido de juego
-    Carta_Bloqueo     // Salta el turno del siguiente jugador
+    Carta_Bloqueo , 
 };
 
 // Estados posibles de la partida
@@ -84,6 +84,10 @@ struct Juego_UNO
     Carta cartaEnJuego; // Carta que está actualmente en juego (en la pila de descarte)
 
     string colorForzado; // Color forzado por una carta especial (ej: +4 o cambio de color)
+
+     Carta cartaPendiente; // Carta pendiente de jugar en un minijuego o acción especial
+
+    
 };
 
 // Estructura para definir las zonas visuales donde se dibujan las cartas en la interfaz gráfica
@@ -132,6 +136,7 @@ void aplicarCambioColor(Juego_UNO &juego);
 void aplicarBloqueo(Juego_UNO &juego);
 void aplicarCambioDireccion(Juego_UNO &juego);
 void aplicarMasDosConMinijuego(Juego_UNO &juego, int jugadorPenalizado, int jugadorComodin);
+
 
 
 // funciones de utilidad grafica
