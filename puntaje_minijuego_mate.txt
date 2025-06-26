@@ -46,3 +46,6 @@ Resultado: GANASTE
 Respuesta dada: c
 Resultado: PERDISTE
 ----------------------
+Respuesta dada: c
+Resultado: GANASTE
+----------------------
