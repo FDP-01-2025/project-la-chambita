@@ -106,35 +106,38 @@ void barajarMazo(Juego_UNO &juego);                                             
 void seleccionarCantidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada);                                      // Permite seleccionar la cantidad de jugadores
 void capturarNombresEnLaVentana(Juego_UNO &juego, int &jugadorActual, string &entradaActual, bool &nombresCompletos); // Captura los nombres de los jugadores
 
-// Comienzo del juego
-void repartirCartas(Juego_UNO &juego);              // Reparte cartas a cada jugador al inicio
-Carta robarCartaValida(Juego_UNO &juego);           // Roba una carta válida del mazo
-void actualizarVisibilidadCartas(Juego_UNO &juego); // Actualiza la visibilidad de las cartas según el turno
+// comienzo del juego
+void repartirCartas(Juego_UNO &juego);
+Carta robarCartaValida(Juego_UNO &juego);
+void actualizarVisibilidadCartas(Juego_UNO &juego);
 
-// Lógica y turnos de jugabilidad
-void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos); // Controla el flujo principal del juego
-void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas);                                    // Dibuja las cartas de un jugador en pantalla
-void dibujarZonaDescarte(const Carta &carta, int x, int y);                                                                          // Dibuja la carta en la pila de descarte
-bool jugadorRobaSiClick(const Rectangle &zonaMazo, Juego_UNO &juego, int jugador);                                                   // Permite que un jugador robe una carta si hace clic en el mazo
-bool sePuedeJugar(Carta actual, Carta elegida);                                                                                      // Verifica si una carta elegida se puede jugar sobre la actual
-bool tieneCartaJugable(const Jugador &jugador, Carta cartaEnjuego);                                                                  // Verifica si el jugador tiene alguna carta jugable
-void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_UNO &juego);                                          // Avanza el turno al siguiente jugador según la dirección
-bool cartaTuvoDobleClick(const Rectangle &rect);                                                                                     // Detecta si una carta fue seleccionada con doble clic
-void intentarRobarYCambiarTurno(Juego_UNO &juego);                                                                                   // Permite robar una carta y pasar el turno si es necesario
-Carta cartaInicial(Juego_UNO &juego);                                                                                                // Selecciona la carta inicial para comenzar la partida
-void guardarEstadisticas(const Juego_UNO &juego, const string &EstadisticaArchivo);                                                  // Guarda las estadísticas de la partida en un archivo
-bool ejecutarMinijuegoReflejos(Juego_UNO &juego);                                                                                    // Ejecuta un minijuego de reflejos
-void aplicarMasDos(Juego_UNO &juego, int objetivo);                                                                                  // Aplica el efecto de la carta +2 al jugador objetivo
-void aplicarMasCuatro(Juego_UNO &juego);                                                                                             // Aplica el efecto de la carta +4
-void aplicarCambioColor(Juego_UNO &juego);                                                                                           // Permite cambiar el color actual del juego
-void aplicarBloqueo(Juego_UNO &juego);                                                                                               // Aplica el efecto de bloqueo (salta turno)
-void aplicarCambioDireccion(Juego_UNO &juego);                                                                                       // Invierte la dirección del turno
-void aplicarMasDosConMinijuego(Juego_UNO &juego, int jugadorPenalizado, int jugadorComodin);                                         // Aplica +2 con minijuego especial
+// logica y turnos de jugabilidad
+void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos);
+void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas);
+void dibujarZonaDescarte(const Carta &carta, int x, int y);
+bool jugadorRobaSiClick(const Rectangle &zonaMazo, Juego_UNO &juego, int jugador);
+bool sePuedeJugar(Carta actual, Carta elegida);
+bool tieneCartaJugable(const Jugador &jugador, Carta cartaEnjuego);
+void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_UNO &juego);
+bool cartaTuvoDobleClick(const Rectangle &rect);
+void intentarRobarYCambiarTurno(Juego_UNO &juego);
+Carta cartaInicial(Juego_UNO &juego);
+void guardarEstadisticas(const Juego_UNO &juego, const string &EstadisticaArchivo);
+//chequeo ganador
+bool jugadorSinCartas(const Jugador &jugador);
+bool ejecutarMinijuegoReflejos(Juego_UNO &juego);
+void aplicarMasDos(Juego_UNO &juego, int objetivo);
+void aplicarMasCuatro(Juego_UNO &juego);
+void aplicarCambioColor(Juego_UNO &juego);
+void aplicarBloqueo(Juego_UNO &juego);
+void aplicarCambioDireccion(Juego_UNO &juego);
+void aplicarMasDosConMinijuego(Juego_UNO &juego, int jugadorPenalizado, int jugadorComodin);
 
-// Funciones de utilidad gráfica
-ZonaVisual obtenerZonaVisual(); // Obtiene las zonas visuales para dibujar el mazo y el descarte
 
-// Estructura para almacenar estadísticas individuales de cada jugador
+// funciones de utilidad grafica
+ZonaVisual obtenerZonaVisual();
+
+// estructuras de estadisticas del jugador
 struct EstadisticasJugador
 {
     int partidasJugadas = 0;   // Total de partidas jugadas

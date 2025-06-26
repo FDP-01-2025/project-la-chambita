@@ -7,7 +7,7 @@ int main()
 
     // aqui va lo de raylib
 
-    InitWindow(1920,1080, " UNO con minijuegos");
+    InitWindow(1366, 768, " UNO con minijuegos");
     SetTargetFPS(30);
 
     Juego_UNO juego = crearJuegoUNO();
@@ -18,19 +18,19 @@ int main()
     bool nombresCompletos;
 
     iniciarVariablesEstado(cantidadSeleccionada, jugadorActual, entradaActual, nombresCompletos);
-
     inicializarMazo(juego);
     barajarMazo(juego);
 
+    //  Aquí se ejecuta todo el ciclo del juego
     ejecutarJuego(juego, cantidadSeleccionada, jugadorActual, entradaActual, nombresCompletos);
 
     CloseWindow();
 
     EstadisticasJugador stats;
 
-// Simulación al terminar una partida
-bool jugadorGano = true;
-int minijuegosEstaPartida = 2;
+    // Simulación al terminar una partida
+    bool jugadorGano = true;
+    int minijuegosEstaPartida = 2;
 
     return 0;
 }

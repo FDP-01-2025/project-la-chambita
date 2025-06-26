@@ -415,6 +415,32 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
             }
         }
 
+        // chequeo ganador
+
+        if (juego.estadoDeJuego == turno_normal)
+        {
+            for (int i = 0; i < juego.cantidadJugadores; i++)
+            {
+                if (jugadorSinCartas(juego.jugadores[i]))
+                {
+                    DrawText(TextFormat("¡%s ha ganado la partida!", juego.jugadores[i].nombre.c_str()), 500, 500, 40, GREEN);
+
+                    juego.jugadores[i].partidas_ganadas++;
+                    for (int j = 0; j < juego.cantidadJugadores; j++)
+                    {
+                        if (j != i)
+                            juego.jugadores[j].partidas_perdidas++;
+                    }
+
+                    guardarEstadisticas(juego, "estadisticas.txt");
+
+                    EndDrawing();
+                    WaitTime(5.0);
+                    return;
+                }
+            }
+        }
+
         EndDrawing();
     }
 }
@@ -762,3 +788,16 @@ void aplicarMasDosConMinijuego(Juego_UNO &juego, int jugadorPenalizado, int juga
         }
     }
 }
+
+// Función para verificar si un jugador no tiene cartas
+bool jugadorSinCartas(const Jugador &jugador)
+{
+    for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
+    {
+        if (!jugador.mano[i].color.empty()) {
+            return false; // Tiene al menos una carta real
+        }
+    }
+    return true; // No tiene cartas
+}
+

@@ -3,10 +3,14 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/raylib/install/include"
+                "${workspaceFolder}/raylib/install/include",
+                "${workspaceFolder}/**"
             ],
-            "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
             "compilerPath": "C:/msys64/mingw64/bin/g++.exe",
             "cStandard": "c11",
             "cppStandard": "c++17",
