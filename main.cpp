@@ -32,7 +32,5 @@ int main()
 bool jugadorGano = true;
 int minijuegosEstaPartida = 2;
 
-actualizarEstadisticas(stats, jugadorGano, minijuegosEstaPartida);
-
     return 0;
 }
