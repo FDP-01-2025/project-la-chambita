@@ -401,15 +401,8 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                         int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
                         aplicarMasDosConMinijuego(juego, jugadorPenalizado, juego.turno_actual);
                     }
-                    else if (carta.tipo == Cambio_color)
-                    {
-                        cout << "¡Comodín de cambio de color jugado!" << endl;
 
-                        iniciarOrdenaPalabra();
-                        juego.estadoDeJuego = minijuego_activo;
-                        juego.cartaPendiente = carta; // Guarda la carta temporalmente
-                    }
-                    carta = Carta{};
+                    carta = Carta{}; // Elimina la carta jugada de la mano
                     avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
                     actualizarVisibilidadCartas(juego);
                     break;
