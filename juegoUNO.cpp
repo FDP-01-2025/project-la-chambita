@@ -1,4 +1,5 @@
-// definir o decirle al programa como funciona cada cosa
+// Implementación de las funciones principales del juego UNO
+// Este archivo contiene la lógica del juego, manejo de cartas, turnos, minijuegos y visualización con raylib.
 
 #include "juegoUNO.h"
 #include <algorithm>
@@ -7,8 +8,9 @@
 #include <fstream>
 #include "raylib.h"
 
-// FUNCIONES:
+// ======================= FUNCIONES PRINCIPALES DEL JUEGO =======================
 
+// Crea e inicializa una estructura Juego_UNO con valores por defecto.
 Juego_UNO crearJuegoUNO()
 {
     Juego_UNO juego;
@@ -18,6 +20,7 @@ Juego_UNO crearJuegoUNO()
     return juego;
 }
 
+// Inicializa variables de estado para la selección de jugadores y nombres.
 void iniciarVariablesEstado(bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
 {
     cantidadSeleccionada = false;
@@ -26,15 +29,18 @@ void iniciarVariablesEstado(bool &cantidadSeleccionada, int &jugadorActual, stri
     nombresCompletos = false;
 }
 
+// Llena el mazo con todas las cartas de UNO (números, especiales y comodines).
 void inicializarMazo(Juego_UNO &juego)
 {
     string colores[4] = {"rojo", "amarillo", "verde", "azul"};
     int indice = 0;
 
+    // Agrega cartas de cada color
     for (int i = 0; i < 4; i++)
     {
         string color = colores[i];
 
+        // Carta 0 (solo una por color)
         Carta c0;
         c0.color = color;
         c0.tipo = Numero;
@@ -42,6 +48,7 @@ void inicializarMazo(Juego_UNO &juego)
         c0.visible = false;
         juego.mazo[indice++] = c0;
 
+        // Cartas 1-9 (dos de cada por color)
         for (int num = 1; num <= 9; num++)
         {
             for (int j = 0; j < 2; j++)
@@ -55,12 +62,13 @@ void inicializarMazo(Juego_UNO &juego)
             }
         }
 
+        // Cartas especiales: +2, bloqueo, reversa (dos de cada por color)
         for (int j = 0; j < 2; j++)
         {
-            Carta cartaMasDos; // Objeto carta
+            Carta cartaMasDos;
             cartaMasDos.color = color;
-            cartaMasDos.tipo = Carta_Mas_dos; // Asignar el valor enum al campo tipo
-            cartaMasDos.valor = -1;           // puedes usar -1 para cartas especiales sin número
+            cartaMasDos.tipo = Carta_Mas_dos;
+            cartaMasDos.valor = -1; // Valor -1 para cartas especiales
             cartaMasDos.visible = false;
             juego.mazo[indice++] = cartaMasDos;
 
@@ -79,6 +87,7 @@ void inicializarMazo(Juego_UNO &juego)
             juego.mazo[indice++] = CambioDireccion;
         }
     }
+    // Comodines: +4 y cambio de color (4 de cada, color negro)
     for (int i = 0; i < 4; i++)
     {
         Carta cartaMasCuatro;
@@ -98,6 +107,7 @@ void inicializarMazo(Juego_UNO &juego)
     juego.cartasEnMazo = indice;
 }
 
+// Baraja el mazo de cartas usando un generador aleatorio.
 void barajarMazo(Juego_UNO &mazo)
 {
     random_device rd;
@@ -105,6 +115,7 @@ void barajarMazo(Juego_UNO &mazo)
     shuffle(mazo.mazo, mazo.mazo + mazo.cartasEnMazo, generador);
 }
 
+// Dibuja botones para seleccionar la cantidad de jugadores y detecta la selección.
 void seleccionarCantidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada)
 {
     DrawText("selecciona la cantidad de jugadores: ", 100, 100, 30, DARKGRAY);
@@ -117,10 +128,11 @@ void seleccionarCantidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada)
     for (int i = 0; i < 3; i++)
     {
         DrawRectangleRec(botones[i], LIGHTGRAY);
-        DrawRectangleLinesEx(botones[i], 2, BLACK);                                         // esta wea es pura estetica. son contornos para rectangulos
-        DrawText(TextFormat("%d", i + 2), botones[i].x + 35, botones[i].y + 10, 30, BLACK); // el %d dice que espera un valor entero
+        DrawRectangleLinesEx(botones[i], 2, BLACK); // Contorno de los botones
+        DrawText(TextFormat("%d", i + 2), botones[i].x + 35, botones[i].y + 10, 30, BLACK); // Texto del botón
     }
 
+    // Detecta clic en algún botón
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
         Vector2 mouse = GetMousePosition();
@@ -135,40 +147,38 @@ void seleccionarCantidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada)
     }
 }
 
+// Permite capturar los nombres de los jugadores uno por uno desde la ventana.
 void capturarNombresEnLaVentana(Juego_UNO &juego, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
 {
-
-    // captura las teclas como caracteres
+    // Captura teclas presionadas como caracteres
     int letra = GetCharPressed();
 
     while (letra > 0)
     {
-        // // Solo acepta caracteres imprimibles de espacio a-z y 20 letras por nombre
+        // Solo acepta caracteres imprimibles y máximo 20 letras por nombre
         if (letra >= 32 && letra <= 125 && entradaActual.length() < 20)
         {
-            entradaActual += static_cast<char>(letra); // agrega la letra al nombre
+            entradaActual += static_cast<char>(letra);
         }
-        letra = GetCharPressed(); // sigue capturando siempre y cuando se esten presionando teclas
+        letra = GetCharPressed();
     }
 
-    // Si se presiona BACKSPACE y hay texto, borra el último carácter
+    // Permite borrar el último carácter con BACKSPACE
     if (IsKeyPressed(KEY_BACKSPACE) && !entradaActual.empty())
     {
-        entradaActual.pop_back(); // borra 1 letra del final
+        entradaActual.pop_back();
     }
 
-    // cuando presione enter, y ya se haya escrito algo
+    // Al presionar ENTER, guarda el nombre y pasa al siguiente jugador
     if (IsKeyPressed(KEY_ENTER) && !entradaActual.empty())
     {
-
-        // esto guarda el nombre actual en el jugador que corresponde
         juego.jugadores[jugadorActual].nombre = entradaActual;
         juego.jugadores[jugadorActual].minijuegos_ganados = 0;
         juego.jugadores[jugadorActual].partidas_ganadas = 0;
         juego.jugadores[jugadorActual].esTurno = false;
 
-        entradaActual.clear(); // limpia la entrada para el sig. jugador
-        jugadorActual++;       // pasa al sig. jugador
+        entradaActual.clear();
+        jugadorActual++;
 
         if (jugadorActual >= juego.cantidadJugadores)
         {
@@ -176,12 +186,13 @@ void capturarNombresEnLaVentana(Juego_UNO &juego, int &jugadorActual, string &en
         }
     }
 
-    // esto vamostrar las instrucciones en pantalla
+    // Muestra instrucciones y nombre actual en pantalla
     DrawText("Escribe el nombre del jugador: ", 100, 100, 30, DARKGRAY);
     DrawText(TextFormat("jugador %d:", jugadorActual + 1), 100, 150, 30, BLUE);
     DrawText(entradaActual.c_str(), 100, 200, 30, BLUE);
 }
 
+// Reparte 7 cartas a cada jugador desde el mazo.
 void repartirCartas(Juego_UNO &juego)
 {
     const int CARTAS_POR_JUGADOR = 7;
@@ -200,18 +211,18 @@ void repartirCartas(Juego_UNO &juego)
     }
 }
 
+// Permite al jugador robar una carta y avanza el turno si no puede jugarla.
 void intentarRobarYCambiarTurno(Juego_UNO &juego)
 {
     Carta cartaRobada = robarCartaValida(juego);
     if (sePuedeJugar(juego.cartaEnJuego, cartaRobada))
     {
         juego.cartaEnJuego = cartaRobada;
-        // no agrego la carta ala baraja pq ya se jugo de una
+        // La carta robada se juega inmediatamente si es válida
     }
-
     else
     {
-        // si no se puede jugar se agrega a la baraja
+        // Si no se puede jugar, se añade a la mano del jugador
         Jugador &jugador = juego.jugadores[juego.turno_actual];
         for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
         {
@@ -227,6 +238,7 @@ void intentarRobarYCambiarTurno(Juego_UNO &juego)
     actualizarVisibilidadCartas(juego);
 }
 
+// Verifica si el jugador tiene alguna carta jugable en su mano.
 bool tieneCartaJugable(const Jugador &jugador, Carta cartaEnjuego)
 {
     for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
@@ -240,23 +252,23 @@ bool tieneCartaJugable(const Jugador &jugador, Carta cartaEnjuego)
     return false;
 }
 
+// Roba una carta del mazo y la devuelve. Si es jugable, la pone en juego.
 Carta robarCartaValida(Juego_UNO &juego)
 {
     if (juego.cartasEnMazo <= 0)
         return Carta{}; // No hay cartas en el mazo
 
-    // Roba la carta
     Carta cartaRobada = juego.mazo[--juego.cartasEnMazo];
     cartaRobada.visible = true;
 
-    // Si se puede jugar, se convierte en la nueva carta en juego
+    // Si la carta robada es jugable, se pone en juego
     if (sePuedeJugar(juego.cartaEnJuego, cartaRobada))
     {
         juego.cartaEnJuego = cartaRobada;
     }
     else
     {
-        // Si no se puede jugar, se le agrega al jugador actual
+        // Si no es jugable, se añade a la mano del jugador actual
         Jugador &jugador = juego.jugadores[juego.turno_actual];
 
         for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
@@ -272,9 +284,10 @@ Carta robarCartaValida(Juego_UNO &juego)
         avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
     }
 
-    return Carta{}; // ya no se necesita devolver nada útil
+    return Carta{}; // No se necesita devolver la carta realmente
 }
 
+// Actualiza la visibilidad de las cartas: solo el jugador en turno ve sus cartas.
 void actualizarVisibilidadCartas(Juego_UNO &juego)
 {
     for (int i = 0; i < juego.cantidadJugadores; i++)
@@ -286,6 +299,7 @@ void actualizarVisibilidadCartas(Juego_UNO &juego)
     }
 }
 
+// Selecciona la carta inicial del juego (no puede ser comodín).
 Carta cartaInicial(Juego_UNO &juego)
 {
     while (juego.cartasEnMazo > 0)
@@ -298,14 +312,15 @@ Carta cartaInicial(Juego_UNO &juego)
         }
         else
         {
-            juego.mazo[juego.cartasEnMazo] = carta; // vuelve al fondo
+            juego.mazo[juego.cartasEnMazo] = carta; // Devuelve la carta al fondo del mazo
         }
     }
 
-    // Si no hay ninguna válida
+    // Si no hay ninguna válida, retorna carta vacía
     return Carta{};
 }
 
+// Bucle principal del juego: gestiona el flujo de pantallas y turnos.
 void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
 {
     ZonaVisual zona = obtenerZonaVisual();
@@ -325,7 +340,7 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
         }
         else
         {
-            // Muestra en pantalla el nombre del jugador que tiene el turno actual
+            // Muestra el nombre del jugador en turno
             DrawText(TextFormat("Turno de: %s", juego.jugadores[juego.turno_actual].nombre.c_str()), 800, 50, 30, RED);
 
             if (juego.estadoDeJuego == esperando_jugadores)
@@ -336,15 +351,17 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                 actualizarVisibilidadCartas(juego);
             }
 
+            // Dibuja las cartas de cada jugador en su posición
             for (int i = 0; i < juego.cantidadJugadores; i++)
             {
-                int y = (i < 2) ? 100 : 700;       // jugadores 0 y 1 arriba, 2 y 3 abajo
-                int x = (i % 2 == 0) ? 100 : 1100; // jugadores 0 y 2 izquierda, 1 y 3 derecha
+                int y = (i < 2) ? 100 : 700;       // Jugadores 0 y 1 arriba, 2 y 3 abajo
+                int x = (i % 2 == 0) ? 100 : 1100; // Jugadores pares izquierda, impares derecha
 
                 bool mostrar = (i == juego.turno_actual);
                 dibujarCartasJugador(juego.jugadores[i], x, y, mostrar);
             }
 
+            // Dibuja el mazo y la zona de descarte
             DrawRectangleRec(zona.zonaMazo, DARKGRAY);
             DrawText("MAZO", zona.zonaMazo.x + 10, zona.zonaMazo.y + 60, 20, WHITE);
 
@@ -355,6 +372,7 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
             int y = (juego.turno_actual < 2) ? 100 : 700;
             int x = (juego.turno_actual % 2 == 0) ? 100 : 1100;
 
+            // Permite jugar una carta con doble clic si es válida
             for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
             {
                 Carta &carta = jugador.mano[i];
@@ -373,19 +391,21 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
 
                     juego.cartaEnJuego = carta;
 
+                    // Si la carta es +2, activa el minijuego de reflejos
                     if (carta.tipo == Carta_Mas_dos)
                     {
                         int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
                         aplicarMasDosConMinijuego(juego, jugadorPenalizado, juego.turno_actual);
                     }
 
-                    carta = Carta{}; // Vaciar carta jugada de la mano
+                    carta = Carta{}; // Elimina la carta jugada de la mano
                     avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
                     actualizarVisibilidadCartas(juego);
                     break;
                 }
             }
 
+            // Permite robar carta si no tiene jugable y hace clic en el mazo
             if (CheckCollisionPointRec(GetMousePosition(), zona.zonaMazo) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
             {
                 if (!tieneCartaJugable(jugador, juego.cartaEnJuego))
@@ -399,33 +419,28 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
     }
 }
 
-// Esta función dibuja en pantalla todas las cartas que un jugador tiene en su mano
+// Dibuja todas las cartas de la mano de un jugador en pantalla.
 void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas)
 {
+    int espacioX = 100; // Espacio horizontal entre cartas
 
-    // esto defne el espcio horizontal entre una carta y otra para que no se encimen.
-    int espacioX = 100;
-
-    // Recorre cada carta de la mano del jugador.
     for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
     {
         if (!mostrarTodas && !jugador.mano[i].visible)
-            continue; // continue: omitir la iteración actual del bucle y pasar a la siguiente iteración.
+            continue;
 
         const Carta &carta = jugador.mano[i];
 
         if (carta.color.empty())
             continue;
 
-        /*Calcula la posición de cada carta en el eje X (horizontal) sumando el espacio entre cartas.
-        El eje Y permanece fijo para que todas las cartas estén alineadas en fila*/
         int x = xInicial + i * ESPACIO_X;
         int y = yInicial;
 
         DrawRectangle(x, y, CARTA_ANCHO, CARTA_ALTO, LIGHTGRAY);
         DrawRectangleLines(x, y, CARTA_ANCHO, CARTA_ALTO, BLACK);
 
-        // Se decide el color con el que se dibujará el texto dentro de la carta, según el color de la carta UNO.
+        // Selecciona el color del texto según el color de la carta
         Color colorTexto = BLACK;
         if (carta.color == "rojo")
             colorTexto = RED;
@@ -438,12 +453,12 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
         else if (carta.color == "negro")
             colorTexto = DARKGRAY;
 
-        // Aquí se traduce el tipo de carta a un texto (o emoji) que aparecerá dentro del rectángulo. se pasa a to string
+        // Traduce el tipo de carta a texto para mostrarlo
         string textoCarta;
         switch (carta.tipo)
         {
         case Numero:
-            textoCarta = to_string(carta.valor); // convierte el valor de int a string para ponerlo en la carta
+            textoCarta = to_string(carta.valor);
             break;
         case Carta_Mas_dos:
             textoCarta = "+2";
@@ -465,16 +480,16 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
             break;
         }
 
-        // centra el texto horizontalmente en la carta
+        // Centra el texto en la carta
         int anchoTexto = MeasureText(textoCarta.c_str(), 20);
         int textoX = x + (80 / 2) - (anchoTexto / 2);
         int textoY = y + 50;
 
-        // Muestra el texto o símbolo de la carta dentro del rectángulo.
         DrawText(textoCarta.c_str(), textoX, textoY, 20, colorTexto);
     }
 }
 
+// Imprime el mazo en consola para depuración.
 void imprimirMazo(const Juego_UNO &juego)
 {
     for (int i = 0; i < juego.cartasEnMazo; i++)
@@ -489,10 +504,10 @@ void imprimirMazo(const Juego_UNO &juego)
     cout << endl;
 }
 
-// Función para comprobar si una carta se puede jugar
+// Verifica si una carta se puede jugar sobre la carta actual en juego.
 bool sePuedeJugar(Carta actual, Carta elegida)
 {
-    // Comodines que siempre se pueden jugar
+    // Comodines siempre se pueden jugar
     if (elegida.tipo == Cambio_color || elegida.tipo == Carta_Mas_cuatro)
         return true;
 
@@ -500,17 +515,18 @@ bool sePuedeJugar(Carta actual, Carta elegida)
     if (elegida.color == actual.color)
         return true;
 
-    // Coincide el número (para cartas numéricas)
+    // Coincide el número (solo para cartas numéricas)
     if (elegida.tipo == Numero && actual.tipo == Numero && elegida.valor == actual.valor)
         return true;
 
-    // Las cartas especiales solo se pueden tirar si coinciden en tipo Y color
+    // Cartas especiales: solo si coinciden en tipo y color
     if (elegida.tipo == actual.tipo && elegida.color == actual.color)
         return true;
 
     return false;
 }
 
+// Detecta si hubo doble clic sobre una carta (para jugarla).
 bool cartaTuvoDobleClick(const Rectangle &rect)
 {
     static float tiempoUltimoClick = 0;
@@ -522,7 +538,7 @@ bool cartaTuvoDobleClick(const Rectangle &rect)
         {
             float tiempoActual = GetTime();
             if (tiempoActual - tiempoUltimoClick < 0.3f)
-            { // 0.3 (segundos) f(porque es valor float)
+            { // Si el segundo clic es rápido, cuenta como doble clic
                 clicks++;
                 if (clicks == 2)
                 {
@@ -540,70 +556,60 @@ bool cartaTuvoDobleClick(const Rectangle &rect)
     return false;
 }
 
+// Dibuja la carta en la zona de descarte.
 void dibujarZonaDescarte(const Carta &carta, int x, int y)
 {
     if (carta.color.empty())
         return;
 
-    else
+    DrawRectangle(x, y, 80, 120, LIGHTGRAY);
+    DrawRectangleLines(x, y, 80, 120, BLACK);
+
+    // Selecciona color del texto según la carta
+    Color colorTexto = BLACK;
+    if (carta.color == "rojo")
+        colorTexto = RED;
+    else if (carta.color == "amarillo")
+        colorTexto = YELLOW;
+    else if (carta.color == "verde")
+        colorTexto = GREEN;
+    else if (carta.color == "azul")
+        colorTexto = BLUE;
+    else if (carta.color == "negro")
+        colorTexto = DARKGRAY;
+
+    // Traduce el tipo de carta a texto
+    string textoCarta;
+    switch (carta.tipo)
     {
-        DrawRectangle(x, y, 80, 120, LIGHTGRAY);
-        DrawRectangleLines(x, y, 80, 120, BLACK);
-
-        Color colorTexto = BLACK;
-        if (carta.color == "rojo")
-            colorTexto = RED;
-
-        else if (carta.color == "amarillo")
-            colorTexto = YELLOW;
-
-        else if (carta.color == "verde")
-            colorTexto = GREEN;
-
-        else if (carta.color == "azul")
-            colorTexto = BLUE;
-
-        else if (carta.color == "negro")
-            colorTexto = DARKGRAY;
-
-        string textoCarta;
-        switch (carta.tipo)
-        {
-        case Numero:
-            textoCarta = to_string(carta.valor);
-            break;
-
-        case Carta_Mas_dos:
-            textoCarta = "+2";
-            break;
-
-        case Carta_Mas_cuatro:
-            textoCarta = "+4";
-            break;
-
-        case Cambio_direccion:
-            textoCarta = "Rev";
-            break;
-
-        case Carta_Bloqueo:
-            textoCarta = "bloqueo";
-            break;
-
-        case Cambio_color:
-            textoCarta = "Color?";
-            break;
-
-        default:
-            textoCarta = "?";
-            break;
-        }
-
-        // esto dibuja el texto en la carta (casi centrado xd)
-        DrawText(textoCarta.c_str(), x + 30, y + 50, 30, colorTexto);
+    case Numero:
+        textoCarta = to_string(carta.valor);
+        break;
+    case Carta_Mas_dos:
+        textoCarta = "+2";
+        break;
+    case Carta_Mas_cuatro:
+        textoCarta = "+4";
+        break;
+    case Cambio_direccion:
+        textoCarta = "Rev";
+        break;
+    case Carta_Bloqueo:
+        textoCarta = "bloqueo";
+        break;
+    case Cambio_color:
+        textoCarta = "Color?";
+        break;
+    default:
+        textoCarta = "?";
+        break;
     }
+
+    // Dibuja el texto centrado en la carta de descarte
+    DrawText(textoCarta.c_str(), x + 30, y + 50, 30, colorTexto);
 }
 
-// Avanza el turno respetando el sentido del juego
+// Avanza el turno al siguiente jugador, respetando la dirección del juego.
 void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_UNO &juego)
 {
     jugadorActual = (jugadorActual + direccion + totalJugadores) % totalJugadores;
@@ -611,6 +617,7 @@ void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_U
     actualizarVisibilidadCartas(juego);
 }
 
+// Devuelve la estructura con las posiciones de la zona visual del mazo y descarte.
 ZonaVisual obtenerZonaVisual()
 {
     ZonaVisual zona;
@@ -619,11 +626,11 @@ ZonaVisual obtenerZonaVisual()
     zona.yDescarte = 300;
     return zona;
 }
-// Funcion para que se guarde los nombres del jugador y las partidas ganadas y perdidas
 
+// Guarda las estadísticas de los jugadores en un archivo de texto.
 void guardarEstadisticas(const Juego_UNO &juego, const string &EstadisticaArchivo)
 {
-    ofstream archivo(EstadisticaArchivo, ios::app); // <- corrección aquí
+    ofstream archivo(EstadisticaArchivo, ios::app);
 
     if (!archivo.is_open())
     {
@@ -646,6 +653,11 @@ void guardarEstadisticas(const Juego_UNO &juego, const string &EstadisticaArchiv
     archivo.close();
     cout << "Estadísticas guardadas en " << EstadisticaArchivo << endl;
 }
+
+//MINIJUEGO DE REFLEJOS PARA CARTA +2
+
+// Ejecuta un minijuego de reflejos: el jugador debe presionar una tecla aleatoria rápidamente.
+// Si gana, el rival roba 2 cartas. Si pierde, el jugador que lanzó el +2 roba 2 cartas.
 bool ejecutarMinijuegoReflejos(Juego_UNO &juego)
 {
     float tiempoLimite = 3.0f; // 3 segundos para reaccionar
@@ -668,7 +680,7 @@ bool ejecutarMinijuegoReflejos(Juego_UNO &juego)
 
         if (IsKeyPressed((int)teclaCorrecta))
         {
-            // Ganó -> rival recibe +2
+            // Ganó: el rival recibe +2 cartas
             int rival = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
 
             for (int i = 0; i < 2; i++)
@@ -688,7 +700,7 @@ bool ejecutarMinijuegoReflejos(Juego_UNO &juego)
         }
     }
 
-    // Perdió -> jugador que lanzó el comodín se castiga con +2
+    // Perdió: el jugador que lanzó el +2 recibe +2 cartas
     int castigado = juego.turno_actual;
     for (int i = 0; i < 2; i++)
     {
@@ -706,6 +718,7 @@ bool ejecutarMinijuegoReflejos(Juego_UNO &juego)
     return false;
 }
 
+// Aplica el efecto de la carta +2 con el minijuego de reflejos.
 void aplicarMasDosConMinijuego(Juego_UNO &juego, int jugadorPenalizado, int jugadorComodin)
 {
     bool ganoMinijuego = ejecutarMinijuegoReflejos(juego);
@@ -731,7 +744,7 @@ void aplicarMasDosConMinijuego(Juego_UNO &juego, int jugadorPenalizado, int juga
     }
     else
     {
-        // El jugador que tiró el +2 (comodín) roba las 2 cartas (castigo)
+        // El jugador que tiró el +2 roba las 2 cartas (castigo)
         for (int i = 0; i < 2; i++)
         {
             Carta cartaRobada = robarCartaValida(juego);
