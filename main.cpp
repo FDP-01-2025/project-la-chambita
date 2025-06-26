@@ -6,8 +6,9 @@ int main()
 {
 
     // aqui va lo de raylib
-
-    InitWindow(1366, 768, " UNO con minijuegos");
+    //dimesiones para joel 1366x768
+    //dimesiones para aaron pantalla 1920x1080
+    InitWindow(1920, 1080, " UNO con minijuegos");
     SetTargetFPS(30);
 
     Juego_UNO juego = crearJuegoUNO();
