@@ -397,17 +397,17 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                         int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
                         aplicarMasDosConMinijuego(juego, jugadorPenalizado, juego.turno_actual);
                     }
-                    // Si la carta es Bloqueo, salta el turno del siguiente jugador
+                    // Si la carta es Bloqueo, salta el turno del siguiente jugador 
                     else if (carta.tipo == Carta_Bloqueo)
                     {
-                        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+                        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);// avanzarTurno no cambia el turno, solo salta al siguiente
                         avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
                     }
                     // Si la carta es Reversa, cambia el sentido del juego
                     else if (carta.tipo == Cambio_direccion)
                     {
-                        juego.direccion *= -1;
-                        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+                        juego.direccion *= -1; // Invierte la dirección del turno
+                        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego); // Avanza al siguiente jugador
                     }
                     else
                     {
