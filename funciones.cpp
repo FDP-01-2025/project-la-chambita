@@ -1,3 +1,5 @@
+#include "juegoUNO.h"
+
 //esta es la funcion para el turno del jugador en el juego UNO
 
 #include <iostream>
@@ -46,12 +48,12 @@ void turnoJugador(Juego_UNO &juego) {
     Carta* mano = juego.manos[jugador];
     Carta cartaActual = juego.pilaDescarte[juego.topeDescarte - 1];
 
-    cout << "\n--- Turno del Jugador " << jugador + 1 << " ---\n";
-    cout << "Carta en el descarte: [" << cartaActual.color << " " << cartaActual.valor << "]\n";
+    std::cout << "\n--- Turno del Jugador " << jugador + 1 << " ---\n";
+    std::cout << "Carta en el descarte: [" << cartaActual.color << " " << cartaActual.valor << "]\n";
 
-    cout << "\nTu mano:\n";
+    std::cout << "\nTu mano:\n";
     for (int i = 0; i < cantidad; ++i) {
-        cout << i + 1 << ". [" << mano[i].color << " " << mano[i].valor << "]\n";
+        std::cout << i + 1 << ". [" << mano[i].color << " " << mano[i].valor << "]\n";
     }
 
     // Verifica si puede jugar
@@ -66,16 +68,16 @@ void turnoJugador(Juego_UNO &juego) {
     if (puedeJugar) {
         int opcion;
         do {
-            cout << "\nElige el número de carta a jugar (0 para robar): ";
-            cin >> opcion;
+            std::cout << "\nElige el número de carta a jugar (0 para robar): ";
+            std::cin >> opcion;
 
             if (opcion == 0) {
                 if (juego.topeMazo > 0) {
                     Carta robada = juego.mazo[--juego.topeMazo];
                     mano[cantidad++] = robada;
-                    cout << "Robaste: [" << robada.color << " " << robada.valor << "]\n";
+                    std::cout << "Robaste: [" << robada.color << " " << robada.valor << "]\n";
                 } else {
-                    cout << "El mazo está vacío. No puedes robar.\n";
+                    std::cout << "El mazo está vacío. No puedes robar.\n";
                 }
                 break;
             } else if (opcion > 0 && opcion <= cantidad) {
@@ -89,7 +91,7 @@ void turnoJugador(Juego_UNO &juego) {
                     }
                     --cantidad;
 
-                    cout << "Jugaste: [" << elegida.color << " " << elegida.valor << "]\n";
+                    std::cout << "Jugaste: [" << elegida.color << " " << elegida.valor << "]\n";
 
                     // Efectos especiales
                     if (elegida.valor == "+2") {
@@ -98,20 +100,20 @@ void turnoJugador(Juego_UNO &juego) {
                         for (int i = 0; i < 2 && juego.topeMazo > 0; ++i) {
                             juego.manos[siguiente][juego.cantidadCartas[siguiente]++] = juego.mazo[--juego.topeMazo];
                         }
-                        cout << "Jugador " << siguiente + 1 << " robó 2 cartas.\n";
+                        std::cout << "Jugador " << siguiente + 1 << " robó 2 cartas.\n";
                     }
                     else if (elegida.valor == "salta") {
-                        cout << "Jugador siguiente pierde su turno.\n";
+                        std::cout << "Jugador siguiente pierde su turno.\n";
                         avanzarTurno(juego);
                     }
                     else if (elegida.valor == "reversa") {
                         juego.sentido *= -1;
-                        cout << "¡Dirección cambiada!\n";
+                        std::cout << "¡Dirección cambiada!\n";
                     }
                     else if (elegida.valor == "comodin" || elegida.valor == "comodin+4") {
                         string nuevoColor;
-                        cout << "Elige nuevo color (rojo, verde, azul, amarillo): ";
-                        cin >> nuevoColor;
+                        std::cout << "Elige nuevo color (rojo, verde, azul, amarillo): ";
+                        std::cin >> nuevoColor;
                         juego.pilaDescarte[juego.topeDescarte - 1].color = nuevoColor;
 
                         if (elegida.valor == "comodin+4") {
@@ -120,29 +122,83 @@ void turnoJugador(Juego_UNO &juego) {
                             for (int i = 0; i < 4 && juego.topeMazo > 0; ++i) {
                                 juego.manos[siguiente][juego.cantidadCartas[siguiente]++] = juego.mazo[--juego.topeMazo];
                             }
-                            cout << "Jugador " << siguiente + 1 << " robó 4 cartas.\n";
+                            std::cout << "Jugador " << siguiente + 1 << " robó 4 cartas.\n";
                         }
                     }
 
                     break;  // Terminó el turno
                 } else {
-                    cout << "Esa carta no se puede jugar.\n";
+                    std::cout << "Esa carta no se puede jugar.\n";
                 }
             } else {
-                cout << "Opción inválida.\n";
+                std::cout << "Opción inválida.\n";
             }
         } while (true);
     } else {
-        cout << "No tienes cartas válidas. Robando una...\n";
+        std::cout << "No tienes cartas válidas. Robando una...\n";
         if (juego.topeMazo > 0) {
             Carta robada = juego.mazo[--juego.topeMazo];
             mano[cantidad++] = robada;
-            cout << "Robaste: [" << robada.color << " " << robada.valor << "]\n";
+            std::cout << "Robaste: [" << robada.color << " " << robada.valor << "]\n";
         } else {
-            cout << "El mazo está vacío.\n";
+            std::cout << "El mazo está vacío.\n";
         }
     }
 
     // Cambia turno al final
     avanzarTurno(juego);
 }
+
+// Guardar partida
+/*
+void guardarPartida(const Jugador &jugador, const Carta &cartaActual, int turno, const std::string &guardarPartida)
+{
+    ofstream archivo("guardar.Partida.txt");
+
+    if (!archivo.is_open())
+    {
+        std::cout << "Error al abrir el archivo para guardar la partida." << std::endl;
+        return;
+    }
+
+    archivo << "Jugador: " << jugador.nombre << std::endl; // Guarda nombre de jugadores
+    archivo << "Cartas en mano: " << juego.mazo[indice++] << std::endl;
+
+    archivo << "Mano ";
+    for (const auto &carta : jugador.mano)
+    {
+        archivo << carta.color << " " << carta.valor << "\n";
+    }
+
+    archivo << "Carta actual: " << cartaActual.color << " " << cartaActual.valor << "\n";
+    archivo << "Turno actual: " << juego.turno_actual << "\n";
+
+    archivo.close();
+    std::cout << "Partida guardada en: " << guardarPartida << std::endl;
+}
+
+// Verificar ganador
+bool verificarGanador(const Jugador &jugador)
+{
+    if (juego.mazo[indice++])
+    {
+        std::cout << jugador.nombre << "Has ganado la partida" << std::endl;
+
+        ofstream archivo("ganadores.txt", std::ios::app);
+        if (archivo.is_open())
+        {
+            archivo << "Ganador: " << jugador.nombre << "\n";
+            archivo.close();
+        }
+        else
+        {
+            std::cout << "No se pudo guardar el resultado en el archivo." << std::endl;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+*/
+

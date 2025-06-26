@@ -1,6 +1,6 @@
 #include "raylib.h"
 #include "juegoUNO.h"
-extern MensajeTemporal mensaje;
+
 using namespace std;
 
 int main()
@@ -19,22 +19,19 @@ int main()
     bool nombresCompletos;
 
     iniciarVariablesEstado(cantidadSeleccionada, jugadorActual, entradaActual, nombresCompletos);
+
     inicializarMazo(juego);
     barajarMazo(juego);
 
-
-     //  Aquí se ejecuta todo el ciclo del juego
     ejecutarJuego(juego, cantidadSeleccionada, jugadorActual, entradaActual, nombresCompletos);
 
-     // ✅ Una vez que el juego termina, se actualizan estadísticas
-    if (juego.estadoDeJuego == juego_terminado)
-    {
-        EstadisticasJugador stats;
-        bool jugadorGano = true; // cambiar por lógica real si la tienes
-        int minijuegosEstaPartida = 2; // o contador real
-        actualizarEstadisticas(stats, jugadorGano, minijuegosEstaPartida);
-    }
-
     CloseWindow();
+
+    EstadisticasJugador stats;
+
+// Simulación al terminar una partida
+bool jugadorGano = true;
+int minijuegosEstaPartida = 2;
+
     return 0;
 }

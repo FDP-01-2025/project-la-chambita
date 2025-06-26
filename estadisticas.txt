@@ -1,0 +1,4 @@
+Partidas Jugadas: 1
+Partidas Ganadas: 1
+Partidas Perdidas: 0
+Minijuegos Jugados: 2

@@ -4,24 +4,10 @@
 #include <algorithm>
 #include <random>
 #include <string>
-#include <sstream>
-#include <sstream> // ponelo en el .cpp donde uses la conversión
-
-std::string intToString(int valor) {
-    std::stringstream ss;
-    ss << valor;
-    return ss.str();
-}
 #include <fstream>
 #include "raylib.h"
-#include <iostream>
-using std::cout;
-using std::endl;
-using std::string;
 
 // FUNCIONES:
-// Al inicio del archivo (fuera de cualquier función)
-MensajeTemporal mensaje; // GLOBAL
 
 Juego_UNO crearJuegoUNO()
 {
@@ -112,13 +98,11 @@ void inicializarMazo(Juego_UNO &juego)
     juego.cartasEnMazo = indice;
 }
 
-void barajarMazo(Juego_UNO &mazo) {
-    // Creamos un generador de números aleatorios con semilla del sistema
-    std::random_device rd;
-    std::mt19937 generador(rd());
-
-    // Usamos std::shuffle para barajar el arreglo de cartas en el mazo
-    std::shuffle(mazo.mazo, mazo.mazo + mazo.cartasEnMazo, generador);
+void barajarMazo(Juego_UNO &mazo)
+{
+    random_device rd;
+    mt19937 generador(rd());
+    shuffle(mazo.mazo, mazo.mazo + mazo.cartasEnMazo, generador);
 }
 
 void seleccionarCantidadJugadores(Juego_UNO &juego, bool &cantidadSeleccionada)
@@ -324,18 +308,11 @@ Carta cartaInicial(Juego_UNO &juego)
 
 void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
 {
-    extern MensajeTemporal mensaje; // Referencia al mensaje global
-
     ZonaVisual zona = obtenerZonaVisual();
-    static int turnoPrevio = -1;  // Para controlar cuándo mostrar el mensaje
 
     while (!WindowShouldClose())
     {
         BeginDrawing();
-        float deltaTime = GetFrameTime();
-
-        DibujarMensaje(mensaje, deltaTime);
-
         ClearBackground(RAYWHITE);
 
         if (!cantidadSeleccionada)
@@ -348,13 +325,7 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
         }
         else
         {
-            // Activar mensaje solo cuando cambia el turno
-            if (turnoPrevio != juego.turno_actual)
-            {
-                ActivarMensaje(mensaje, "¡Turno del Jugador " + std::to_string(juego.turno_actual + 1) + "!", 2.0f);
-                turnoPrevio = juego.turno_actual;
-            }
-
+            // Muestra en pantalla el nombre del jugador que tiene el turno actual
             DrawText(TextFormat("Turno de: %s", juego.jugadores[juego.turno_actual].nombre.c_str()), 800, 50, 30, RED);
 
             if (juego.estadoDeJuego == esperando_jugadores)
@@ -367,17 +338,8 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
 
             for (int i = 0; i < juego.cantidadJugadores; i++)
             {
-                int y, x;
-
-                if (i < 2)
-                    y = 100;
-                else
-                    y = 700;
-
-                if (i % 2 == 0)
-                    x = 100;
-                else
-                    x = 1100;
+                int y = (i < 2) ? 100 : 700;       // jugadores 0 y 1 arriba, 2 y 3 abajo
+                int x = (i % 2 == 0) ? 100 : 1100; // jugadores 0 y 2 izquierda, 1 y 3 derecha
 
                 bool mostrar = (i == juego.turno_actual);
                 dibujarCartasJugador(juego.jugadores[i], x, y, mostrar);
@@ -407,30 +369,33 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
 
                 if (cartaTuvoDobleClick(rect) && sePuedeJugar(juego.cartaEnJuego, carta))
                 {
-                    std::cout << "Carta jugada: " << carta.color << ", tipo: " << carta.tipo << ", valor: " << carta.valor << std::endl;
+                    cout << "Carta jugada: " << carta.color << ", tipo: " << carta.tipo << ", valor: " << carta.valor << endl;
+
                     juego.cartaEnJuego = carta;
-                    carta = Carta{};
-                    if (verificarGanador(jugador))
+
+                    if (carta.tipo == Carta_Mas_dos)
                     {
-                        juego.estadoDeJuego = juego_terminado;
-                        break;
+                        int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
+                        aplicarMasDosConMinijuego(juego, jugadorPenalizado, juego.turno_actual);
                     }
+
+                    carta = Carta{}; // Vaciar carta jugada de la mano
                     avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
                     actualizarVisibilidadCartas(juego);
                     break;
                 }
-
-                if (CheckCollisionPointRec(GetMousePosition(), zona.zonaMazo) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-                {
-                    if (!tieneCartaJugable(jugador, juego.cartaEnJuego))
-                    {
-                        intentarRobarYCambiarTurno(juego);
-                    }
-                }
             }
 
-            EndDrawing();
+            if (CheckCollisionPointRec(GetMousePosition(), zona.zonaMazo) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                if (!tieneCartaJugable(jugador, juego.cartaEnJuego))
+                {
+                    intentarRobarYCambiarTurno(juego);
+                }
+            }
         }
+
+        EndDrawing();
     }
 }
 
@@ -478,8 +443,7 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
         switch (carta.tipo)
         {
         case Numero:
-            textoCarta = intToString(carta.valor);
- // convierte el valor de int a string para ponerlo en la carta
+            textoCarta = to_string(carta.valor); // convierte el valor de int a string para ponerlo en la carta
             break;
         case Carta_Mas_dos:
             textoCarta = "+2";
@@ -606,7 +570,7 @@ void dibujarZonaDescarte(const Carta &carta, int x, int y)
         switch (carta.tipo)
         {
         case Numero:
-            textoCarta = intToString(carta.valor);
+            textoCarta = to_string(carta.valor);
             break;
 
         case Carta_Mas_dos:
@@ -645,9 +609,6 @@ void avanzarTurno(int &jugadorActual, int direccion, int totalJugadores, Juego_U
     jugadorActual = (jugadorActual + direccion + totalJugadores) % totalJugadores;
     juego.turno_actual = jugadorActual;
     actualizarVisibilidadCartas(juego);
-
-    // ✅ Activar mensaje visible
-  ActivarMensaje(mensaje, "¡Turno del Jugador " + intToString(juego.turno_actual + 1) + "!", 2.0f);
 }
 
 ZonaVisual obtenerZonaVisual()
@@ -658,67 +619,133 @@ ZonaVisual obtenerZonaVisual()
     zona.yDescarte = 300;
     return zona;
 }
+// Funcion para que se guarde los nombres del jugador y las partidas ganadas y perdidas
 
-// Esta función actualiza las estadísticas del jugador y las guarda en un archivo de texto
-// Recibe una referencia a las estadísticas del jugador, un booleano que indica si ganó la partida,
-// y el número de minijuegos jugados en la partida actual.
-
-void actualizarEstadisticas(EstadisticasJugador &stats, bool ganoPartida, int minijuegosJugadosEnPartida)
+void guardarEstadisticas(const Juego_UNO &juego, const string &EstadisticaArchivo)
 {
-    stats.partidasJugadas++;
-    if (ganoPartida)
+    ofstream archivo(EstadisticaArchivo, ios::app); // <- corrección aquí
+
+    if (!archivo.is_open())
     {
-        stats.partidasGanadas++;
+        cout << "Error al abrir el archivo para guardar estadísticas." << endl;
+        return;
+    }
+
+    archivo << "----- Resultados de la partida -----" << endl;
+
+    for (int i = 0; i < juego.cantidadJugadores; ++i)
+    {
+        const Jugador &jugador = juego.jugadores[i];
+        archivo << "Jugador: " << jugador.nombre << endl;
+        archivo << "  Partidas ganadas: " << jugador.partidas_ganadas << endl;
+        archivo << "  Partidas perdidas: " << jugador.partidas_perdidas << endl;
+        archivo << "  Minijuegos ganados: " << jugador.minijuegos_ganados << endl;
+        archivo << "-----------------------------------" << endl;
+    }
+
+    archivo.close();
+    cout << "Estadísticas guardadas en " << EstadisticaArchivo << endl;
+}
+bool ejecutarMinijuegoReflejos(Juego_UNO &juego)
+{
+    float tiempoLimite = 3.0f; // 3 segundos para reaccionar
+    float tiempoTranscurrido = 0.0f;
+    char teclaCorrecta = 'A' + GetRandomValue(0, 25); // Tecla aleatoria entre A-Z
+
+    while (!WindowShouldClose() && tiempoTranscurrido < tiempoLimite)
+    {
+        float deltaTime = GetFrameTime();
+        tiempoTranscurrido += deltaTime;
+
+        BeginDrawing();
+        ClearBackground(BLACK);
+
+        DrawText("¡MINIJUEGO DE REFLEJOS!", 600, 200, 40, YELLOW);
+        DrawText(TextFormat("Presiona la tecla: %c", teclaCorrecta), 600, 300, 30, LIGHTGRAY);
+        DrawText(TextFormat("Tiempo restante: %.2f", tiempoLimite - tiempoTranscurrido), 600, 400, 25, RED);
+
+        EndDrawing();
+
+        if (IsKeyPressed((int)teclaCorrecta))
+        {
+            // Ganó -> rival recibe +2
+            int rival = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
+
+            for (int i = 0; i < 2; i++)
+            {
+                Carta nueva = robarCartaValida(juego);
+                for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+                {
+                    if (juego.jugadores[rival].mano[j].color.empty())
+                    {
+                        juego.jugadores[rival].mano[j] = nueva;
+                        break;
+                    }
+                }
+            }
+
+            return true;
+        }
+    }
+
+    // Perdió -> jugador que lanzó el comodín se castiga con +2
+    int castigado = juego.turno_actual;
+    for (int i = 0; i < 2; i++)
+    {
+        Carta nueva = robarCartaValida(juego);
+        for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+        {
+            if (juego.jugadores[castigado].mano[j].color.empty())
+            {
+                juego.jugadores[castigado].mano[j] = nueva;
+                break;
+            }
+        }
+    }
+
+    return false;
+}
+
+void aplicarMasDosConMinijuego(Juego_UNO &juego, int jugadorPenalizado, int jugadorComodin)
+{
+    bool ganoMinijuego = ejecutarMinijuegoReflejos(juego);
+
+    if (ganoMinijuego)
+    {
+        // El jugador penalizado roba 2 cartas
+        for (int i = 0; i < 2; i++)
+        {
+            Carta cartaRobada = robarCartaValida(juego);
+            if (!cartaRobada.color.empty())
+            {
+                for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+                {
+                    if (juego.jugadores[jugadorPenalizado].mano[j].color.empty())
+                    {
+                        juego.jugadores[jugadorPenalizado].mano[j] = cartaRobada;
+                        break;
+                    }
+                }
+            }
+        }
     }
     else
     {
-        stats.partidasPerdidas++;
-    }
-    stats.minijuegosJugados += minijuegosJugadosEnPartida;
-
-    // Guarda en archivo de texto
-    std::ofstream archivo("estadisticas.txt");
-    if (archivo.is_open())
-    {
-        archivo << "Partidas Jugadas: " << stats.partidasJugadas << '\n';
-        archivo << "Partidas Ganadas: " << stats.partidasGanadas << '\n';
-        archivo << "Partidas Perdidas: " << stats.partidasPerdidas << '\n';
-        archivo << "Minijuegos Jugados: " << stats.minijuegosJugados << '\n';
-        archivo.close();
-    }
-}
-
-// Activa el mensaje temporal con el texto y duración especificados
-void ActivarMensaje(MensajeTemporal &mensaje, const string &nuevoMensaje, float duracion)
-{
-    mensaje.texto = nuevoMensaje;
-    mensaje.tiempoRestante = duracion;
-    mensaje.activo = true;
-}
-
-// Dibuja el mensaje en pantalla si está activo
-void DibujarMensaje(MensajeTemporal &mensaje, float deltaTime)
-{
-    if (mensaje.activo)
-    {
-        DrawText(mensaje.texto.c_str(), 100, 100, 30, RAYWHITE); // puedes ajustar posición/tamaño/color
-        mensaje.tiempoRestante -= deltaTime;
-
-        if (mensaje.tiempoRestante <= 0)
+        // El jugador que tiró el +2 (comodín) roba las 2 cartas (castigo)
+        for (int i = 0; i < 2; i++)
         {
-            mensaje.activo = false;
+            Carta cartaRobada = robarCartaValida(juego);
+            if (!cartaRobada.color.empty())
+            {
+                for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+                {
+                    if (juego.jugadores[jugadorComodin].mano[j].color.empty())
+                    {
+                        juego.jugadores[jugadorComodin].mano[j] = cartaRobada;
+                        break;
+                    }
+                }
+            }
         }
     }
-}
-
-//nuevo
-bool verificarGanador(const Jugador &jugador) {
-    // Aquí va la lógica para determinar si el jugador ganó.
-    // Por ejemplo:
-    for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++) {
-        if (jugador.mano[i].visible && !jugador.mano[i].color.empty()) {
-            return false; // Aún tiene cartas
-        }
-    }
-    return true; // No tiene cartas visibles, ganó
 }
