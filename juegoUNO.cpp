@@ -400,9 +400,14 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                     // Si la carta es Bloqueo, salta el turno del siguiente jugador
                     else if (carta.tipo == Carta_Bloqueo)
                     {
-                        // Avanza dos veces el turno para saltar al siguiente jugador
-                        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego); // Salta uno
-                        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego); // Salta otro (el siguiente jugador pierde turno)
+                        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+                        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+                    }
+                    // Si la carta es Reversa, cambia el sentido del juego
+                    else if (carta.tipo == Cambio_direccion)
+                    {
+                        juego.direccion *= -1;
+                        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
                     }
                     else
                     {
