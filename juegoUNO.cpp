@@ -397,9 +397,18 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                         int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
                         aplicarMasDosConMinijuego(juego, jugadorPenalizado, juego.turno_actual);
                     }
-
+                    // Si la carta es Bloqueo, salta el turno del siguiente jugador
+                    else if (carta.tipo == Carta_Bloqueo)
+                    {
+                        // Avanza dos veces el turno para saltar al siguiente jugador
+                        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego); // Salta uno
+                        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego); // Salta otro (el siguiente jugador pierde turno)
+                    }
+                    else
+                    {
+                        avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+                    }
                     carta = Carta{}; // Elimina la carta jugada de la mano
-                    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
                     actualizarVisibilidadCartas(juego);
                     break;
                 }
