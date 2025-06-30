@@ -5,7 +5,6 @@ using namespace std;
 
 int main()
 {
-
     // aqui va lo de raylib
     //dimesiones para joel 1366x768
     //dimesiones para aaron pantalla 1920x1080

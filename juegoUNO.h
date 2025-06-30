@@ -116,6 +116,7 @@ Carta robarCartaValida(Juego_UNO &juego);
 void actualizarVisibilidadCartas(Juego_UNO &juego);
 
 // logica y turnos de jugabilidad
+void mostrarMenuPrincipal(); //menu principal
 void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos);
 void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas);
 void dibujarZonaDescarte(const Carta &carta, int x, int y);

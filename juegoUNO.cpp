@@ -10,7 +10,6 @@
 #include "minijuego_Palabra.h"
 
 // ======================= FUNCIONES PRINCIPALES DEL JUEGO =======================
-
 // Crea e inicializa una estructura Juego_UNO con valores por defecto.
 Juego_UNO crearJuegoUNO()
 {
@@ -324,11 +323,49 @@ Carta cartaInicial(Juego_UNO &juego)
     return Carta{};
 }
 
+//menu principal
+void mostrarMenuPrincipal() {
+    bool menuActivo = true;
+
+    Rectangle botonJugar = { 583, 300, 200, 60 };
+    Rectangle botonCerrar = { 583, 400, 200, 60 };
+
+    while (menuActivo && !WindowShouldClose()) {
+        Vector2 mouse = GetMousePosition();
+
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+
+        DrawText("Bienvenidos a UNO", 550, 200, 30, DARKGRAY);
+
+        // Botón Jugar
+        DrawRectangleRec(botonJugar, CheckCollisionPointRec(mouse, botonJugar) ? LIGHTGRAY : GRAY);
+        DrawText("JUGAR", botonJugar.x + 60, botonJugar.y + 15, 30, BLACK);
+
+        // Botón Cerrar
+        DrawRectangleRec(botonCerrar, CheckCollisionPointRec(mouse, botonCerrar) ? LIGHTGRAY : GRAY);
+        DrawText("CERRAR", botonCerrar.x + 55, botonCerrar.y + 15, 30, BLACK);
+
+        EndDrawing();
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if (CheckCollisionPointRec(mouse, botonJugar)) {
+                menuActivo = false;  // Sale del menú y continúa al juego
+            } else if (CheckCollisionPointRec(mouse, botonCerrar)) {
+                CloseWindow();       // Cierra la ventana directamente
+                exit(0);             // Termina el programa completamente
+            }
+        }
+    }
+}
+
+
 // Bucle principal del juego: gestiona el flujo de pantallas y turnos.
 void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
-{
+{  
     // temporal
     ZonaVisual zona = obtenerZonaVisual();
+    mostrarMenuPrincipal();
 
     while (!WindowShouldClose())
     {
