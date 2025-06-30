@@ -565,10 +565,13 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
     }
 }
 
-// Dibuja todas las cartas de la mano de un jugador en pantalla.
+// Dibuja todas las cartas de la mano de un jugador en pantalla. //a ver si funciona
 void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas)
 {
-    int espacioX = 100; // Espacio horizontal entre cartas
+    int espacioX = 100; // espacio entre cartas
+    int maxCartasFila = 7; // máximo cartas por fila
+
+    Vector2 mouse = GetMousePosition();
 
     for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
     {
@@ -576,64 +579,54 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
             continue;
 
         const Carta &carta = jugador.mano[i];
-
         if (carta.color.empty())
             continue;
 
-        int x = xInicial + i * ESPACIO_X;
-        int y = yInicial;
+        // Calcula la fila y la columna dentro de la fila
+        int fila = i / maxCartasFila;     // 0 para fila 1, 1 para fila 2
+        int columna = i % maxCartasFila;
 
-        DrawRectangle(x, y, CARTA_ANCHO, CARTA_ALTO, LIGHTGRAY);
-        DrawRectangleLines(x, y, CARTA_ANCHO, CARTA_ALTO, BLACK);
+        int x = xInicial + columna * espacioX;
+        int y = yInicial + fila * (CARTA_ALTO + 10); // 10 pixeles de separación entre filas
 
-        // Selecciona el color del texto según el color de la carta
+        Rectangle rectCarta = { (float)x, (float)y, (float)CARTA_ANCHO, (float)CARTA_ALTO };
+
+        // Detectar hover
+        bool mouseSobreCarta = CheckCollisionPointRec(mouse, rectCarta);
+        Color colorFondo = mouseSobreCarta ? LIGHTGRAY : GRAY;
+
+        DrawRectangleRec(rectCarta, colorFondo);
+        DrawRectangleLinesEx(rectCarta, 2, BLACK);
+
+        // Color del texto según el color de la carta
         Color colorTexto = BLACK;
-        if (carta.color == "rojo")
-            colorTexto = RED;
-        else if (carta.color == "amarillo")
-            colorTexto = YELLOW;
-        else if (carta.color == "verde")
-            colorTexto = GREEN;
-        else if (carta.color == "azul")
-            colorTexto = BLUE;
-        else if (carta.color == "negro")
-            colorTexto = DARKGRAY;
+        if (carta.color == "rojo") colorTexto = RED;
+        else if (carta.color == "amarillo") colorTexto = YELLOW;
+        else if (carta.color == "verde") colorTexto = GREEN;
+        else if (carta.color == "azul") colorTexto = BLUE;
+        else if (carta.color == "negro") colorTexto = DARKGRAY;
 
-        // Traduce el tipo de carta a texto para mostrarlo
+        // Texto de la carta según tipo
         string textoCarta;
         switch (carta.tipo)
         {
-        case Numero:
-            textoCarta = to_string(carta.valor);
-            break;
-        case Carta_Mas_dos:
-            textoCarta = "+2";
-            break;
-        case Carta_Mas_cuatro:
-            textoCarta = "+4️";
-            break;
-        case Cambio_color:
-            textoCarta = "Color";
-            break;
-        case Cambio_direccion:
-            textoCarta = "Reversa";
-            break;
-        case Carta_Bloqueo:
-            textoCarta = "Bloqueo";
-            break;
-        default:
-            textoCarta = "?";
-            break;
+            case Numero: textoCarta = to_string(carta.valor); break;
+            case Carta_Mas_dos: textoCarta = "+2"; break;
+            case Carta_Mas_cuatro: textoCarta = "+4️"; break;
+            case Cambio_color: textoCarta = "Color"; break;
+            case Cambio_direccion: textoCarta = "Reversa"; break;
+            case Carta_Bloqueo: textoCarta = "Bloqueo"; break;
+            default: textoCarta = "?"; break;
         }
 
-        // Centra el texto en la carta
         int anchoTexto = MeasureText(textoCarta.c_str(), 20);
-        int textoX = x + (80 / 2) - (anchoTexto / 2);
-        int textoY = y + 50;
+        int textoX = x + (CARTA_ANCHO / 2) - (anchoTexto / 2);
+        int textoY = y + (CARTA_ALTO / 2) - 10;
 
         DrawText(textoCarta.c_str(), textoX, textoY, 20, colorTexto);
     }
 }
+
 
 // Imprime el mazo en consola para depuración.
 void imprimirMazo(const Juego_UNO &juego)
