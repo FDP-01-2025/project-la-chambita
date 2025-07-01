@@ -72,11 +72,10 @@ void actualizarMinijuegoOrdenaPalabra(Jugador &jugador)
     int centerX = GetScreenWidth() / 2;
     int centerY = GetScreenHeight() / 2;
 
-
     framesDesdeInicio++;
     if (!iniciado)
         return;
-
+    ClearBackground(RAYWHITE);
     // Entrada de texto
     int key = GetCharPressed();
     if (key > 0 && intentoLen < longitud)
@@ -112,19 +111,33 @@ void actualizarMinijuegoOrdenaPalabra(Jugador &jugador)
         }
     }
 
-    DrawText("Ordena la palabra:", 250, 50, 20, DARKGRAY);
-    DrawText(palabraMezclada, 300, 100, 40, BLUE);
-    DrawText("Tu intento:", 270, 160, 20, DARKGRAY);
-    DrawText(intentoUsuario, 300, 190, 40, DARKGREEN);
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+
+    const char *titulo = "Ordena la palabra:";
+    int anchoTitulo = MeasureText(titulo, 30);
+    DrawText(titulo, (screenWidth - anchoTitulo) / 2, 100, 30, DARKGRAY);
+    int anchoPalabra = MeasureText(palabraMezclada, 40);
+    DrawText(palabraMezclada, (screenWidth - anchoPalabra) / 2, 160, 40, BLUE);
+    const char *intentoLabel = "Tu intento:";
+    int anchoLabel = MeasureText(intentoLabel, 20);
+    DrawText(intentoLabel, (screenWidth - anchoLabel) / 2, 230, 20, DARKGRAY);
+    int anchoIntento = MeasureText(intentoUsuario, 40);
+    DrawText(intentoUsuario, (screenWidth - anchoIntento) / 2, 260, 40, DARKGREEN);
 
     char textoIntentos[50];
     sprintf(textoIntentos, "Intentos: %d / %d", intentos, maxIntentos);
-    DrawText(textoIntentos, 270, 250, 20, DARKGRAY);
+    int anchoIntentos = MeasureText(textoIntentos, 20);
+    DrawText(textoIntentos, (screenWidth - anchoIntentos) / 2, 320, 20, DARKGRAY);
 
     if (terminado && framesDesdeInicio > 1)
     {
-        DrawText(gano ? "¡Correcto!" : "Fallaste", 330, 300, 30, gano ? DARKGREEN : RED);
-        DrawText("Presiona ENTER para continuar", 250, 350, 20, BLACK);
+        const char *mensaje = gano ? "¡Correcto!" : "Fallaste";
+        int anchoMensaje = MeasureText(mensaje, 30);
+        DrawText(mensaje, (screenWidth - anchoMensaje) / 2, 370, 30, gano ? DARKGREEN : RED);
+        const char *continuar = "Presiona ENTER para continuar";
+        int anchoContinuar = MeasureText(continuar, 20);
+        DrawText(continuar, (screenWidth - anchoContinuar) / 2, 420, 20, BLACK);
 
         if (IsKeyPressed(KEY_ENTER))
         {

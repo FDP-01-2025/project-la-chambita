@@ -323,14 +323,16 @@ Carta cartaInicial(Juego_UNO &juego)
     return Carta{};
 }
 
-//menu principal
-void mostrarMenuPrincipal() {
+// menu principal
+void mostrarMenuPrincipal()
+{
     bool menuActivo = true;
 
-    Rectangle botonJugar = { 583, 300, 200, 60 };
-    Rectangle botonCerrar = { 583, 400, 200, 60 };
+    Rectangle botonJugar = {583, 300, 200, 60};
+    Rectangle botonCerrar = {583, 400, 200, 60};
 
-    while (menuActivo && !WindowShouldClose()) {
+    while (menuActivo && !WindowShouldClose())
+    {
         Vector2 mouse = GetMousePosition();
 
         BeginDrawing();
@@ -348,21 +350,24 @@ void mostrarMenuPrincipal() {
 
         EndDrawing();
 
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            if (CheckCollisionPointRec(mouse, botonJugar)) {
-                menuActivo = false;  // Sale del menú y continúa al juego
-            } else if (CheckCollisionPointRec(mouse, botonCerrar)) {
-                CloseWindow();       // Cierra la ventana directamente
-                exit(0);             // Termina el programa completamente
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        {
+            if (CheckCollisionPointRec(mouse, botonJugar))
+            {
+                menuActivo = false; // Sale del menú y continúa al juego
+            }
+            else if (CheckCollisionPointRec(mouse, botonCerrar))
+            {
+                CloseWindow(); // Cierra la ventana directamente
+                exit(0);       // Termina el programa completamente
             }
         }
     }
 }
 
-
 // Bucle principal del juego: gestiona el flujo de pantallas y turnos.
 void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos)
-{  
+{
     // temporal
     ZonaVisual zona = obtenerZonaVisual();
     mostrarMenuPrincipal();
@@ -437,6 +442,12 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                     {
                         int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
                         aplicarMasDosConMinijuego(juego, jugadorPenalizado, juego.turno_actual);
+                    }//probar minijuego ordena la palabra
+                    else if (carta.tipo == Carta_Mas_cuatro || carta.tipo == Cambio_color)
+                    {
+                        juego.estadoDeJuego = minijuego_activo;
+                        juego.cartaPendiente = carta;
+                        iniciarOrdenaPalabra();
                     }
 
                     carta = Carta{}; // Elimina la carta jugada de la mano
@@ -568,7 +579,7 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
 // Dibuja todas las cartas de la mano de un jugador en pantalla. //a ver si funciona
 void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas)
 {
-    int espacioX = 100; // espacio entre cartas
+    int espacioX = 100;    // espacio entre cartas
     int maxCartasFila = 7; // máximo cartas por fila
 
     Vector2 mouse = GetMousePosition();
@@ -583,13 +594,13 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
             continue;
 
         // Calcula la fila y la columna dentro de la fila
-        int fila = i / maxCartasFila;     // 0 para fila 1, 1 para fila 2
+        int fila = i / maxCartasFila; // 0 para fila 1, 1 para fila 2
         int columna = i % maxCartasFila;
 
         int x = xInicial + columna * espacioX;
         int y = yInicial + fila * (CARTA_ALTO + 10); // 10 pixeles de separación entre filas
 
-        Rectangle rectCarta = { (float)x, (float)y, (float)CARTA_ANCHO, (float)CARTA_ALTO };
+        Rectangle rectCarta = {(float)x, (float)y, (float)CARTA_ANCHO, (float)CARTA_ALTO};
 
         // Detectar hover
         bool mouseSobreCarta = CheckCollisionPointRec(mouse, rectCarta);
@@ -600,23 +611,42 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
 
         // Color del texto según el color de la carta
         Color colorTexto = BLACK;
-        if (carta.color == "rojo") colorTexto = RED;
-        else if (carta.color == "amarillo") colorTexto = YELLOW;
-        else if (carta.color == "verde") colorTexto = GREEN;
-        else if (carta.color == "azul") colorTexto = BLUE;
-        else if (carta.color == "negro") colorTexto = DARKGRAY;
+        if (carta.color == "rojo")
+            colorTexto = RED;
+        else if (carta.color == "amarillo")
+            colorTexto = YELLOW;
+        else if (carta.color == "verde")
+            colorTexto = GREEN;
+        else if (carta.color == "azul")
+            colorTexto = BLUE;
+        else if (carta.color == "negro")
+            colorTexto = DARKGRAY;
 
         // Texto de la carta según tipo
         string textoCarta;
         switch (carta.tipo)
         {
-            case Numero: textoCarta = to_string(carta.valor); break;
-            case Carta_Mas_dos: textoCarta = "+2"; break;
-            case Carta_Mas_cuatro: textoCarta = "+4️"; break;
-            case Cambio_color: textoCarta = "Color"; break;
-            case Cambio_direccion: textoCarta = "Reversa"; break;
-            case Carta_Bloqueo: textoCarta = "Bloqueo"; break;
-            default: textoCarta = "?"; break;
+        case Numero:
+            textoCarta = to_string(carta.valor);
+            break;
+        case Carta_Mas_dos:
+            textoCarta = "+2";
+            break;
+        case Carta_Mas_cuatro:
+            textoCarta = "+4️";
+            break;
+        case Cambio_color:
+            textoCarta = "Color";
+            break;
+        case Cambio_direccion:
+            textoCarta = "Reversa";
+            break;
+        case Carta_Bloqueo:
+            textoCarta = "Bloqueo";
+            break;
+        default:
+            textoCarta = "?";
+            break;
         }
 
         int anchoTexto = MeasureText(textoCarta.c_str(), 20);
@@ -626,7 +656,6 @@ void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bo
         DrawText(textoCarta.c_str(), textoX, textoY, 20, colorTexto);
     }
 }
-
 
 // Imprime el mazo en consola para depuración.
 void imprimirMazo(const Juego_UNO &juego)
