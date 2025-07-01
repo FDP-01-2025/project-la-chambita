@@ -1,0 +1,4 @@
+Palabra: algoritmo
+Intentos: 1
+Resultado: GANASTE
+----------------------

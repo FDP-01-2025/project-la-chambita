@@ -419,6 +419,22 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
             int y = (juego.turno_actual < 2) ? 100 : 700;
             int x = (juego.turno_actual % 2 == 0) ? 100 : 1100;
 
+            // Contar cartas visibles del jugador actual
+            int cartasVisibles = 0;
+            for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
+            {
+                if (!jugador.mano[i].color.empty())
+                {
+                    cartasVisibles++;
+                }
+            }
+
+            // Mostrar "¡UNO!" si solo tiene una carta
+            if (cartasVisibles == 1)
+            {
+                DrawText("¡UNO!", x + 200, y - 40, 40, RED); // Ajusta posición según tu diseño
+            }
+
             // Permite jugar una carta con doble clic si es válida
             for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
             {
@@ -442,7 +458,7 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                     {
                         int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
                         aplicarMasDosConMinijuego(juego, jugadorPenalizado, juego.turno_actual);
-                    }//probar minijuego ordena la palabra
+                    } // probar minijuego ordena la palabra
                     else if (carta.tipo == Carta_Mas_cuatro || carta.tipo == Cambio_color)
                     {
                         juego.estadoDeJuego = minijuego_activo;
