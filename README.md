@@ -2,28 +2,28 @@
 # Proyecto de C++ - UNO con minijuegos
 
 ## Descripción del Proyecto
+Este proyecto es una versión digital del clásico juego de cartas UNO, programada en C++ con gráficos usando raylib. Su propósito es ofrecer una experiencia de juego tradicional mejorada con minijuegos interactivos que se activan al jugar ciertas cartas especiales.
 
-Breve descripción del juego, su propósito, cómo se juega y cualquier otro detalle importante que describa la idea general del proyecto.
+El objetivo es quedarse sin cartas antes que los demás, siguiendo las reglas clásicas (combinar por color o número y usar cartas especiales como +2, reversa, salta turno y comodines). Para usar algunas cartas especiales, el jugador debe ganar un minijuego; si pierde, el efecto se le devuelve.
 
-**Por ejemplo:**
-Este proyecto consiste en un juego de aventuras donde el jugador debe explorar un mundo virtual, recoger objetos, resolver acertijos y enfrentar enemigos. El juego utiliza estructuras de control como `if`, `switch`, y bucles `while` y `for` para generar interacciones dinámicas.
+Los minijuegos desafían velocidad, memoria, lógica y reflejos, mezclando estrategia con acción en tiempo real y creando una experiencia única y dinámica para el jugador.
 
 ## Equipo
 
-- **Nombre del equipo:** [Nombre del equipo]
+- **Nombre del equipo:** [LA CHAMBITA]
 
 ### Integrantes del equipo
 
 1. **Nombre completo:** Aaron Enmanuel Fuentes Murillo "the goat"  
    **Carnet:** 00075925
 
-2. **Nombre completo:** Joel Andres Escalante Rivas 
+2. **Nombre completo:** Joel Andres Escalante Rivas.
    **Carnet:** 00031825
 
-4. **Nombre completo:** [Nombre del estudiante 3]  
-   **Carnet:** [Carnet del estudiante 3]
-
-(Agregar más integrantes si es necesario)
+4. **Nombre completo:** Michelle Carolina Escobar Navas.
+   **Carnet:** 00081518
+5. **Nombre completo:** Heberto Johalmo Estrada Hernandez.
+   **Carnet:** 00138821
 
 ## Instrucciones de Ejecución
 
@@ -45,15 +45,21 @@ Este proyecto consiste en un juego de aventuras donde el jugador debe explorar u
 
 project-la-chambita/
 ├── main.cpp
-├── juegoUNO.cpp
-├── juegoUNO.h
-├── raylib/         <-----   (esta es la carpeta que acabas de descargar)
-│   └── install/
-│       ├── include/
-│       │   └── raylib.h
-│       └── lib/
-│           └── libraylib.a
-
+├── README.md
+├── archivos/
+│   └── ...
+├── assets/
+│   └── ...
+├── include/
+│   └── ...
+├── src/
+│   └── ...
+└── raylib/                <----- Carpeta de la librería raylib
+    └── install/
+        ├── include/
+        │   └── raylib.h
+        └── lib/
+            └── libraylib.a
 
 3. Compilar usando MSYS2 MINGW64 Shell
 
@@ -64,7 +70,7 @@ project-la-chambita/
       (en el caso de que lo clones en el escritorio)
 
 - compila el proyecto usando:
-g++ main.cpp juegoUNO.cpp -o UNO -I../install/include -L../install/lib -lraylib -lopengl32 -lgdi32 -lwinmm 
-
+g++ main.cpp src/juegoUNO.cpp src/minijuego_Palabra.cpp -o UNO -I../install/include -L../install/lib -lraylib -lopengl32 -lgdi32 -lwinmm
+ 
 -ejecuta el programa usando:
 ./UNO.exe
