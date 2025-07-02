@@ -3,7 +3,7 @@
 #include <string>
 #include <ctime>
 #include <fstream>
-#include "juegoUNO.h"
+#include "../include/juegoUNO.h"
 #include <cstring>
 
 // Estado interno del minijuego
@@ -22,7 +22,7 @@ static int framesDesdeInicio = 0;
 // Guardar puntaje
 void guardarPuntaje(const std::string &palabra, int intentos)
 {
-    std::ofstream archivo("puntaje_minijuego.txt", std::ios::app);
+    std::ofstream archivo("archivos/minijuego_palabra.txt", std::ios::app);
     if (archivo.is_open())
     {
         archivo << "Palabra: " << palabra << "\n";

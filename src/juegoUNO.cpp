@@ -1,13 +1,13 @@
 // Implementación de las funciones principales del juego UNO
 // Este archivo contiene la lógica del juego, manejo de cartas, turnos, minijuegos y visualización con raylib.
 
-#include "juegoUNO.h"
+#include "../include/juegoUNO.h"
 #include <algorithm>
 #include <random>
 #include <string>
 #include <fstream>
 #include "raylib.h"
-#include "minijuego_Palabra.h"
+#include "../include/minijuego_Palabra.h"
 
 // ======================= FUNCIONES PRINCIPALES DEL JUEGO =======================
 // Crea e inicializa una estructura Juego_UNO con valores por defecto.
@@ -500,7 +500,7 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                             juego.jugadores[j].partidas_perdidas++;
                     }
 
-                    guardarEstadisticas(juego, "estadisticas.txt");
+                    guardarEstadisticas(juego, "archivos/estadisticas.txt");
 
                     EndDrawing();
                     WaitTime(5.0);

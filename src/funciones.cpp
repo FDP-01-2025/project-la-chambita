@@ -1,4 +1,4 @@
-#include "juegoUNO.h"
+#include "../include/juegoUNO.h"
 
 //esta es la funcion para el turno del jugador en el juego UNO
 
