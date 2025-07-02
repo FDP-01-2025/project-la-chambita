@@ -14,16 +14,17 @@ Los minijuegos desafían velocidad, memoria, lógica y reflejos, mezclando estra
 
 ### Integrantes del equipo
 
-1. **Nombre completo:** Aaron Enmanuel Fuentes Murillo "the goat"  
-   **Carnet:** 00075925
+1.**Nombre completo:** Aaron Enmanuel Fuentes Murillo "the goat"
+  **Carnet:** 00075925
 
-2. **Nombre completo:** Joel Andres Escalante Rivas.
-   **Carnet:** 00031825
+2.**Nombre completo:** Joel Andres Escalante Rivas
+  **Carnet:** 00031825
 
-4. **Nombre completo:** Michelle Carolina Escobar Navas.
-   **Carnet:** 00081518
-5. **Nombre completo:** Heberto Johalmo Estrada Hernandez.
-   **Carnet:** 00138821
+3.**Nombre completo:** Michelle Carolina Escobar Navas
+  **Carnet:** 00081518
+
+4.**Nombre completo:** Heberto Johalmo Estrada Hernandez
+  **Carnet:** 00138821
 
 ## Instrucciones de Ejecución
 
