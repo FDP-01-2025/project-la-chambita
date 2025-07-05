@@ -1,0 +1,9 @@
+Respuesta dada: b
+Resultado: GANASTE
+----------------------
+Respuesta dada: a
+Resultado: PERDISTE
+----------------------
+Respuesta dada: b
+Resultado: GANASTE
+----------------------
