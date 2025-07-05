@@ -1,6 +1,9 @@
 #include "raylib.h"
 #include "include/juegoUNO.h"
 #include "include/minijuego_Palabra.h"
+#include "include/minijuego_Intruso.h"
+#include "include/minijuego_Velocidad.h"
+#include "include/minijuego_matematico.h"
 using namespace std;
 
 int main()

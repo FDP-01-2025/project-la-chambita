@@ -75,3 +75,12 @@ g++ main.cpp src/juegoUNO.cpp src/minijuego_Palabra.cpp -o UNO -I../install/incl
  
 -ejecuta el programa usando:
 ./UNO.exe
+
+
+
+
+OJITOOOO
+
+depues de agregarle los otros mini juegos se compila asi y se ejecuta de la misma manera
+
+g++ main.cpp src/juegoUNO.cpp src/minijuego_Palabra.cpp src/minijuego_Intruso.cpp src/minijuego_Velocidad.cpp src/minijuego_matematico.cpp -o UNO -I../install/include -L../install/lib -lraylib -lopengl32 -lgdi32 -lwinmm

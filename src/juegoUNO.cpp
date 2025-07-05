@@ -8,6 +8,9 @@
 #include <fstream>
 #include "raylib.h"
 #include "../include/minijuego_Palabra.h"
+#include "../include/minijuego_Intruso.h"
+#include "../include/minijuego_Velocidad.h"
+#include "../include/minijuego_matematico.h"
 
 // ======================= FUNCIONES PRINCIPALES DEL JUEGO =======================
 // Crea e inicializa una estructura Juego_UNO con valores por defecto.
@@ -17,6 +20,7 @@ Juego_UNO crearJuegoUNO()
     juego.estadoDeJuego = esperando_jugadores;
     juego.turno_actual = 0;
     juego.direccion = 1;
+    juego.minijuegoActivo = ninguno;
     return juego;
 }
 
@@ -454,16 +458,53 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
 
                     juego.cartaEnJuego = carta;
 
-                    if (carta.tipo == Carta_Mas_dos)
+                    // Aplicar efectos según el tipo de carta
+                    switch (carta.tipo)
                     {
-                        int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
-                        aplicarMasDosConMinijuego(juego, jugadorPenalizado, juego.turno_actual);
-                    } // probar minijuego ordena la palabra
-                    else if (carta.tipo == Carta_Mas_cuatro || carta.tipo == Cambio_color)
-                    {
-                        juego.estadoDeJuego = minijuego_activo;
-                        juego.cartaPendiente = carta;
-                        iniciarOrdenaPalabra();
+                    case Carta_Mas_dos:
+                        {
+                            // Minijuego de encontrar intruso para +2
+                            juego.estadoDeJuego = minijuego_activo;
+                            juego.minijuegoActivo = encontrar_intruso;
+                            juego.cartaPendiente = carta;
+                            iniciarMinijuegoIntruso();
+                        }
+                        break;
+                        
+                    case Carta_Mas_cuatro:
+                    case Cambio_color:
+                        {
+                            // Minijuego de ordenar palabra para +4 y cambio de color
+                            juego.estadoDeJuego = minijuego_activo;
+                            juego.minijuegoActivo = ordenar_palabra;
+                            juego.cartaPendiente = carta;
+                            iniciarOrdenaPalabra();
+                        }
+                        break;
+                        
+                    case Carta_Bloqueo:
+                        {
+                            // Minijuego de velocidad para bloqueo
+                            juego.estadoDeJuego = minijuego_activo;
+                            juego.minijuegoActivo = velocidad;
+                            juego.cartaPendiente = carta;
+                            iniciarMinijuegoVelocidad();
+                        }
+                        break;
+                        
+                    case Cambio_direccion:
+                        {
+                            // Minijuego matemático para cambio de dirección
+                            juego.estadoDeJuego = minijuego_activo;
+                            juego.minijuegoActivo = matematico;
+                            juego.cartaPendiente = carta;
+                            // El minijuego matemático se maneja de forma diferente
+                        }
+                        break;
+                        
+                    default:
+                        // Cartas numéricas no tienen efectos especiales
+                        break;
                     }
 
                     carta = Carta{}; // Elimina la carta jugada de la mano
@@ -509,83 +550,159 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
             }
         }
 
-        // ✅ BLOQUE INDEPENDIENTE PARA EL MINIJUEGO DE ORDENAR PALABRA
+            // BLOQUE PARA TODOS LOS MINIJUEGOS
         if (juego.estadoDeJuego == minijuego_activo)
         {
-            DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLACK);
-            actualizarMinijuegoOrdenaPalabra(juego.jugadores[juego.turno_actual]);
+            bool minijuegoTerminado = false;
+            bool minijuegoGanado = false;
 
-            if (minijuegoOrdenaTerminado())
+            // Ejecutar el minijuego correspondiente
+            switch (juego.minijuegoActivo)
             {
-                if (IsKeyPressed(KEY_ENTER))
-                {
-                    if (minijuegoOrdenaGano())
-                    {
-                        juego.cartaEnJuego = juego.cartaPendiente; // ✅ Descarta la carta
-                    }
-                    else
-                    {
-                        // ❌ Penalización: el siguiente jugador roba 4 cartas
-                        int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
+            case ordenar_palabra:
+                DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLACK);
+                actualizarMinijuegoOrdenaPalabra(juego.jugadores[juego.turno_actual]);
+                minijuegoTerminado = minijuegoOrdenaTerminado();
+                if (minijuegoTerminado) minijuegoGanado = minijuegoOrdenaGano();
+                break;
 
-                        for (int i = 0; i < 4; i++)
+            case encontrar_intruso:
+                DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLACK);
+                actualizarMinijuegoIntruso(juego.jugadores[juego.turno_actual]);
+                minijuegoTerminado = minijuegoIntrusoTerminado();
+                if (minijuegoTerminado) minijuegoGanado = minijuegoIntrusoGano();
+                break;
+
+            case velocidad:
+                DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLACK);
+                actualizarMinijuegoVelocidad(juego.jugadores[juego.turno_actual]);
+                minijuegoTerminado = minijuegoVelocidadTerminado();
+                if (minijuegoTerminado) minijuegoGanado = minijuegoVelocidadGano();
+                break;
+
+            case matematico:
+                // El minijuego matemático se maneja de forma diferente (ventana separada)
+                if (jugarMinijuegoMatematico())
+                {
+                    minijuegoGanado = true;
+                    minijuegoTerminado = true;
+                }
+                else
+                {
+                    minijuegoGanado = false;
+                    minijuegoTerminado = true;
+                }
+                break;
+
+            default:
+                break;
+            }
+
+            // Manejar el resultado del minijuego
+            if (minijuegoTerminado)
+            {
+                if (minijuegoGanado)
+                {
+                    // ✅ Ganó el minijuego: la carta se juega normalmente
+                    juego.cartaEnJuego = juego.cartaPendiente;
+                    
+                    // Aplicar efectos específicos según el tipo de carta
+                    switch (juego.cartaPendiente.tipo)
+                    {
+                    case Carta_Mas_dos:
                         {
-                            Carta cartaRobada = robarCartaValida(juego);
-                            if (!cartaRobada.color.empty())
+                            int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
+                            aplicarMasDos(juego, jugadorPenalizado);
+                        }
+                        break;
+                        
+                    case Carta_Mas_cuatro:
+                        aplicarMasCuatro(juego);
+                        break;
+                        
+                    case Carta_Bloqueo:
+                        aplicarBloqueo(juego);
+                        break;
+                        
+                    case Cambio_direccion:
+                        aplicarCambioDireccion(juego);
+                        break;
+                        
+                    default:
+                        break;
+                    }
+                    
+                    // Para cartas de cambio de color, asignar color aleatorio
+                    if (juego.cartaPendiente.tipo == Cambio_color || juego.cartaPendiente.tipo == Carta_Mas_cuatro)
+                    {
+                        string colores[] = {"rojo", "azul", "verde", "amarillo"};
+                        juego.cartaEnJuego.color = colores[rand() % 4];
+                    }
+                }
+                else
+                {
+                    // ❌ Perdió el minijuego: penalización
+                    int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
+                    
+                    // El jugador penalizado roba cartas según el tipo
+                    int cartasARobar = 0;
+                    switch (juego.cartaPendiente.tipo)
+                    {
+                    case Carta_Mas_dos:
+                        cartasARobar = 2;
+                        break;
+                    case Carta_Mas_cuatro:
+                        cartasARobar = 4;
+                        break;
+                    case Carta_Bloqueo:
+                        cartasARobar = 1;
+                        break;
+                    case Cambio_direccion:
+                        cartasARobar = 1;
+                        break;
+                    default:
+                        cartasARobar = 2;
+                        break;
+                    }
+                    
+                    for (int i = 0; i < cartasARobar; i++)
+                    {
+                        Carta cartaRobada = robarCartaValida(juego);
+                        if (!cartaRobada.color.empty())
+                        {
+                            for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
                             {
-                                for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+                                if (juego.jugadores[jugadorPenalizado].mano[j].color.empty())
                                 {
-                                    if (juego.jugadores[jugadorPenalizado].mano[j].color.empty())
-                                    {
-                                        juego.jugadores[jugadorPenalizado].mano[j] = cartaRobada;
-                                        break;
-                                    }
+                                    juego.jugadores[jugadorPenalizado].mano[j] = cartaRobada;
+                                    break;
                                 }
                             }
                         }
                     }
-
-                    // 🎨 Color aleatorio para carta de cambio de color
-                    int colorIndex = rand() % 4;
-                    switch (colorIndex)
-                    {
-                    case 0:
-                        juego.cartaEnJuego.color = "rojo";
-                        break;
-                    case 1:
-                        juego.cartaEnJuego.color = "azul";
-                        break;
-                    case 2:
-                        juego.cartaEnJuego.color = "verde";
-                        break;
-                    case 3:
-                        juego.cartaEnJuego.color = "amarillo";
-                        break;
-                    }
-                    // Salir del minijuego y volver al juego normal
-                    juego.estadoDeJuego = turno_normal;
-
-                    // Limpia la carta jugada de la mano
-                    for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
-                    {
-                        if (juego.jugadores[juego.turno_actual].mano[i].color == juego.cartaEnJuego.color &&
-                            juego.jugadores[juego.turno_actual].mano[i].tipo == juego.cartaEnJuego.tipo &&
-                            juego.jugadores[juego.turno_actual].mano[i].valor == juego.cartaEnJuego.valor)
-                        {
-                            juego.jugadores[juego.turno_actual].mano[i] = Carta{};
-                            break;
-                        }
-                    }
-
-                    // 🔁 Continuar juego normalmente
-                    juego.estadoDeJuego = turno_normal;
-                    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
-                    actualizarVisibilidadCartas(juego);
                 }
+
+                // Limpiar la carta jugada de la mano del jugador actual
+                for (int i = 0; i < MAX_CARTAS_POR_JUGADOR; i++)
+                {
+                    if (juego.jugadores[juego.turno_actual].mano[i].color == juego.cartaPendiente.color &&
+                        juego.jugadores[juego.turno_actual].mano[i].tipo == juego.cartaPendiente.tipo &&
+                        juego.jugadores[juego.turno_actual].mano[i].valor == juego.cartaPendiente.valor)
+                    {
+                        juego.jugadores[juego.turno_actual].mano[i] = Carta{};
+                        break;
+                    }
+                }
+
+                // Volver al juego normal y avanzar turno
+                juego.estadoDeJuego = turno_normal;
+                juego.minijuegoActivo = ninguno;
+                avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+                actualizarVisibilidadCartas(juego);
             }
 
-            EndDrawing(); // ❗ Ya se dibujó todo lo del minijuego, cerramos frame
-            continue;     // ⛔ Saltamos el resto del ciclo para no sobreescribir la pantalla
+            EndDrawing();
+            continue; // Saltar el resto del ciclo para no sobreescribir la pantalla
         }
 
         EndDrawing();
@@ -691,7 +808,7 @@ void imprimirMazo(const Juego_UNO &juego)
 // Verifica si una carta se puede jugar sobre la carta actual en juego.
 bool sePuedeJugar(Carta actual, Carta elegida)
 {
-    // Comodines siempre se pueden jugar
+    // Comodines siempre se pueden jugar (negros)
     if (elegida.tipo == Cambio_color || elegida.tipo == Carta_Mas_cuatro)
         return true;
 
@@ -703,8 +820,12 @@ bool sePuedeJugar(Carta actual, Carta elegida)
     if (elegida.tipo == Numero && actual.tipo == Numero && elegida.valor == actual.valor)
         return true;
 
-    // Cartas especiales: solo si coinciden en tipo y color
-    if (elegida.tipo == actual.tipo && elegida.color == actual.color)
+    // Cartas especiales del mismo tipo se pueden jugar una sobre otra
+    // (excepto comodines que ya se verificaron arriba)
+    if (elegida.tipo == actual.tipo && 
+        (elegida.tipo == Carta_Mas_dos || 
+         elegida.tipo == Carta_Bloqueo || 
+         elegida.tipo == Cambio_direccion))
         return true;
 
     return false;
@@ -945,6 +1066,68 @@ void aplicarMasDosConMinijuego(Juego_UNO &juego, int jugadorPenalizado, int juga
             }
         }
     }
+}
+
+// Aplica el efecto de la carta +2 (sin minijuego)
+void aplicarMasDos(Juego_UNO &juego, int objetivo)
+{
+    for (int i = 0; i < 2; i++)
+    {
+        Carta cartaRobada = robarCartaValida(juego);
+        if (!cartaRobada.color.empty())
+        {
+            for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+            {
+                if (juego.jugadores[objetivo].mano[j].color.empty())
+                {
+                    juego.jugadores[objetivo].mano[j] = cartaRobada;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+// Aplica el efecto de la carta +4
+void aplicarMasCuatro(Juego_UNO &juego)
+{
+    int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
+    
+    for (int i = 0; i < 4; i++)
+    {
+        Carta cartaRobada = robarCartaValida(juego);
+        if (!cartaRobada.color.empty())
+        {
+            for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+            {
+                if (juego.jugadores[jugadorPenalizado].mano[j].color.empty())
+                {
+                    juego.jugadores[jugadorPenalizado].mano[j] = cartaRobada;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+// Aplica el efecto de cambio de color
+void aplicarCambioColor(Juego_UNO &juego)
+{
+    // El color se selecciona aleatoriamente después del minijuego
+    // Esta función se llama después de que el minijuego determine el color
+}
+
+// Aplica el efecto de la carta bloqueo (salta turno)
+void aplicarBloqueo(Juego_UNO &juego)
+{
+    // El bloqueo simplemente avanza el turno dos veces (salta al siguiente)
+    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+}
+
+// Aplica el efecto de cambio de dirección
+void aplicarCambioDireccion(Juego_UNO &juego)
+{
+    juego.direccion *= -1; // Invierte la dirección del juego
 }
 
 // Función para verificar si un jugador no tiene cartas

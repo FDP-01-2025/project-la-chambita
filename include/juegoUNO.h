@@ -42,6 +42,17 @@ enum estado_de_juego
     juego_terminado      // El juego ha finalizado
 };
 
+// Tipos de minijuegos disponibles
+enum tipo_minijuego
+{
+    ninguno,
+    ordenar_palabra,     // Para +4 y Cambio_color
+    encontrar_intruso,   // Para +2
+    velocidad,           // Para Bloqueo
+    matematico,          // Para Cambio_direccion
+    reflejos             // Para +2 (alternativo)
+};
+
 // Estructura que representa una carta del juego UNO
 struct Carta
 {
@@ -86,8 +97,7 @@ struct Juego_UNO
     string colorForzado; // Color forzado por una carta especial (ej: +4 o cambio de color)
 
      Carta cartaPendiente; // Carta pendiente de jugar en un minijuego o acción especial
-
-    
+    tipo_minijuego minijuegoActivo; // Tipo de minijuego actualmente activo
 };
 
 // Estructura para definir las zonas visuales donde se dibujan las cartas en la interfaz gráfica
@@ -137,6 +147,11 @@ void aplicarCambioColor(Juego_UNO &juego);
 void aplicarBloqueo(Juego_UNO &juego);
 void aplicarCambioDireccion(Juego_UNO &juego);
 void aplicarMasDosConMinijuego(Juego_UNO &juego, int jugadorPenalizado, int jugadorComodin);
+void aplicarMasDos(Juego_UNO &juego, int objetivo);
+void aplicarMasCuatro(Juego_UNO &juego);
+void aplicarCambioColor(Juego_UNO &juego);
+void aplicarBloqueo(Juego_UNO &juego);
+void aplicarCambioDireccion(Juego_UNO &juego);
 
 
 
