@@ -752,12 +752,15 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                 juego.estadoDeJuego = turno_normal;
                 juego.minijuegoActivo = ninguno;
 
-                // Avance de turno extra SOLO para +2 y +4
-                if (juego.cartaPendiente.tipo == Carta_Mas_dos || juego.cartaPendiente.tipo == Carta_Mas_cuatro) {
-                    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego); // Salta el turno del penalizado
+                // Avance de turno según el tipo de carta
+                if (juego.cartaPendiente.tipo == Carta_Bloqueo) {
+                    // Para bloqueo, salta el turno del siguiente jugador (avanza dos veces)
+                    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+                    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
+                } else {
+                    // Para +2, +4, Cambio_color y otras cartas, solo avanza una vez
+                    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
                 }
-                // Avance de turno normal para todos los casos
-                avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
                 actualizarVisibilidadCartas(juego);
             }
 
