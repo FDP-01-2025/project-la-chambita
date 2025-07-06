@@ -14,7 +14,7 @@ Los minijuegos desafían velocidad, memoria, lógica y reflejos, mezclando estra
 
 ### Integrantes del equipo
 
-1.**Nombre completo:** Aaron Enmanuel Fuentes Murillo "the goat"
+1.**Nombre completo:** Aaron Enmanuel Fuentes Murillo
   **Carnet:** 00075925
 
 2.**Nombre completo:** Joel Andres Escalante Rivas
