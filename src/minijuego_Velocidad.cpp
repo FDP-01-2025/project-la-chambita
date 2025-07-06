@@ -5,6 +5,8 @@
 #include "../include/juegoUNO.h"
 #include "../include/minijuego_Velocidad.h"
 
+using namespace std;
+
 // Estado interno del minijuego
 static bool iniciado = false;
 static bool terminado = false;
@@ -17,7 +19,7 @@ static int framesDesdeInicio = 0;
 // Guardar puntaje
 void guardarPuntajeVelocidad(char tecla, bool gano, float tiempo)
 {
-    std::ofstream archivo("archivos/minijuego_velocidad.txt", std::ios::app);
+    ofstream archivo("archivos/minijuego_velocidad.txt", ios::app);
     if (archivo.is_open())
     {
         archivo << "Tecla presionada: " << tecla << "\n";
@@ -31,9 +33,7 @@ void guardarPuntajeVelocidad(char tecla, bool gano, float tiempo)
 // Inicializar minijuego
 void iniciarMinijuegoVelocidad()
 {
-    // Generar tecla aleatoria entre A-Z
     teclaCorrecta = 'A' + GetRandomValue(0, 25);
-    
     tiempoTranscurrido = 0.0f;
     terminado = false;
     gano = false;
@@ -44,25 +44,29 @@ void iniciarMinijuegoVelocidad()
 // Actualizar lógica y dibujar minijuego
 void actualizarMinijuegoVelocidad(Jugador &jugador)
 {
-    framesDesdeInicio++;
     if (!iniciado)
         return;
 
+    framesDesdeInicio++;
     float deltaTime = GetFrameTime();
-    tiempoTranscurrido += deltaTime;
 
-    // Verificar si se presionó la tecla correcta
-    if (IsKeyPressed((int)teclaCorrecta))
+    if (!terminado)
     {
-        gano = true;
-        terminado = true;
-        guardarPuntajeVelocidad(teclaCorrecta, true, tiempoTranscurrido);
-    }
-    // Verificar si se acabó el tiempo
-    else if (tiempoTranscurrido >= tiempoLimite)
-    {
-        terminado = true;
-        guardarPuntajeVelocidad('N', false, tiempoLimite);
+        tiempoTranscurrido += deltaTime;
+
+        // Verificar si se presionó la tecla correcta
+        if (IsKeyPressed((int)teclaCorrecta))
+        {
+            gano = true;
+            terminado = true;
+            guardarPuntajeVelocidad(teclaCorrecta, true, tiempoTranscurrido);
+        }
+        // Verificar si se acabó el tiempo
+        else if (tiempoTranscurrido >= tiempoLimite)
+        {
+            terminado = true;
+            guardarPuntajeVelocidad(teclaCorrecta, false, tiempoLimite);
+        }
     }
 
     ClearBackground(BLACK);
@@ -88,7 +92,7 @@ void actualizarMinijuegoVelocidad(Jugador &jugador)
     // Tiempo restante
     float tiempoRestante = tiempoLimite - tiempoTranscurrido;
     if (tiempoRestante < 0) tiempoRestante = 0;
-    
+
     char tiempoStr[50];
     sprintf(tiempoStr, "Tiempo restante: %.1f", tiempoRestante);
     int anchoTiempo = MeasureText(tiempoStr, 30);
@@ -97,24 +101,24 @@ void actualizarMinijuegoVelocidad(Jugador &jugador)
     // Barra de progreso del tiempo
     float progreso = tiempoTranscurrido / tiempoLimite;
     if (progreso > 1.0f) progreso = 1.0f;
-    
+
     int barraWidth = 400;
     int barraHeight = 20;
     int barraX = (screenWidth - barraWidth) / 2;
     int barraY = 400;
-    
+
     // Fondo de la barra
     DrawRectangle(barraX, barraY, barraWidth, barraHeight, DARKGRAY);
     // Progreso de la barra
     DrawRectangle(barraX, barraY, (int)(barraWidth * progreso), barraHeight, RED);
 
     // Mensaje de resultado
-    if (terminado && framesDesdeInicio > 1)
+    if (terminado)
     {
         const char *mensaje = gano ? "¡Excelente! Presionaste la tecla a tiempo." : "¡Demasiado lento! Se acabó el tiempo.";
         int anchoMensaje = MeasureText(mensaje, 25);
         DrawText(mensaje, (screenWidth - anchoMensaje) / 2, 450, 25, gano ? DARKGREEN : RED);
-        
+
         if (gano)
         {
             char tiempoUsadoStr[50];
@@ -122,7 +126,7 @@ void actualizarMinijuegoVelocidad(Jugador &jugador)
             int anchoTiempoUsado = MeasureText(tiempoUsadoStr, 20);
             DrawText(tiempoUsadoStr, (screenWidth - anchoTiempoUsado) / 2, 480, 20, LIGHTGRAY);
         }
-        
+
         const char *continuar = "Presiona ENTER para continuar";
         int anchoContinuar = MeasureText(continuar, 20);
         DrawText(continuar, (screenWidth - anchoContinuar) / 2, 520, 20, WHITE);
@@ -144,4 +148,4 @@ bool minijuegoVelocidadTerminado()
 bool minijuegoVelocidadGano()
 {
     return gano;
-} 
+}
