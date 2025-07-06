@@ -1440,7 +1440,6 @@ void aplicarBloqueo(Juego_UNO &juego)
     // El bloqueo salta el turno del siguiente jugador respetando la dirección
     // Avanza una vez para el siguiente jugador, y otra vez para saltarlo
     avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
-    avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
 }
 
 // Aplica el efecto de cambio de dirección
