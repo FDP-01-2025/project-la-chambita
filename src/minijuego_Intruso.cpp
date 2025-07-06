@@ -6,6 +6,8 @@
 #include "../include/juegoUNO.h"
 #include "../include/minijuego_Intruso.h"
 
+using namespace std;
+
 // Estado interno del minijuego
 static bool iniciado = false;
 static bool terminado = false;
@@ -20,9 +22,9 @@ static int tamano = 4;
 static int framesDesdeInicio = 0;
 
 // Guardar puntaje
-void guardarPuntajeIntruso(const std::string &intrusoEncontrado, int intentos)
+void guardarPuntajeIntruso(const string &intrusoEncontrado, int intentos)
 {
-    std::ofstream archivo("archivos/minijuego_intruso.txt", std::ios::app);
+    ofstream archivo("archivos/minijuego_intruso.txt", ios::app);
     if (archivo.is_open())
     {
         archivo << "Intruso encontrado: " << intrusoEncontrado << "\n";
@@ -35,18 +37,18 @@ void guardarPuntajeIntruso(const std::string &intrusoEncontrado, int intentos)
 
 // Generar elementos aleatorios
 void generarElementosAleatorios(Element arr[], int& size, Element& intruso) {
-    std::string numbers[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-    std::string fruits[] = {"apple", "pear", "grape", "orange", "banana", "strawberry", "kiwi", "mango"};
-    std::string colors[] = {"red", "blue", "green", "yellow", "purple", "pink", "orange", "black"};
-    std::string animals[] = {"dog", "cat", "elephant", "giraffe", "tiger", "lion", "monkey", "bird"};
+    string numbers[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+    string fruits[] = {"apple", "pear", "grape", "orange", "banana", "strawberry", "kiwi", "mango"};
+    string colors[] = {"red", "blue", "green", "yellow", "purple", "pink", "orange", "black"};
+    string animals[] = {"dog", "cat", "elephant", "giraffe", "tiger", "lion", "monkey", "bird"};
 
-    std::string types[] = {"number", "fruit", "color", "animal"};
-    std::string selectedType = types[rand() % 4];
+    string types[] = {"number", "fruit", "color", "animal"};
+    string selectedType = types[rand() % 4];
 
     size = 4; // Tamaño fijo
 
     // Llenar el arreglo con elementos del mismo tipo
-    for (int i = 0; i < size - 1; i++) {
+    for (int i = 0; i < size; i++) {
         if (selectedType == "number") {
             arr[i].value = numbers[rand() % 10];
             arr[i].type = "number";
@@ -63,7 +65,7 @@ void generarElementosAleatorios(Element arr[], int& size, Element& intruso) {
     }
 
     // Elegir un tipo diferente para el intruso
-    std::string intruderType;
+    string intruderType;
     do {
         intruderType = types[rand() % 4];
     } while (intruderType == selectedType);
@@ -92,7 +94,7 @@ void generarElementosAleatorios(Element arr[], int& size, Element& intruso) {
 void iniciarMinijuegoIntruso()
 {
     generarElementosAleatorios(elementos, tamano, intruso);
-    
+
     longitudEntrada = 0;
     entradaUsuario[0] = '\0';
     intentos = 0;
@@ -118,7 +120,7 @@ void actualizarMinijuegoIntruso(Jugador &jugador)
         entradaUsuario[longitudEntrada++] = (char)key;
         entradaUsuario[longitudEntrada] = '\0';
     }
-    
+
     if (IsKeyPressed(KEY_BACKSPACE) && longitudEntrada > 0)
     {
         longitudEntrada--;
@@ -128,7 +130,7 @@ void actualizarMinijuegoIntruso(Jugador &jugador)
     if (IsKeyPressed(KEY_ENTER) && longitudEntrada > 0)
     {
         intentos++;
-        bool correcto = (std::string(entradaUsuario) == intruso.value);
+        bool correcto = (string(entradaUsuario) == intruso.value);
 
         if (correcto)
         {
@@ -170,14 +172,14 @@ void actualizarMinijuegoIntruso(Jugador &jugador)
     {
         int x = inicioX + i * (elementoSize + espacio);
         int y = inicioY;
-        
+
         // Fondo del elemento
         Color colorFondo = LIGHTGRAY;
         if (elementos[i].type == "number") colorFondo = SKYBLUE;
         else if (elementos[i].type == "fruit") colorFondo = GREEN;
-        else if (elementos[i].type == "color") colorFondo = LIGHTGRAY;
+        else if (elementos[i].type == "color") colorFondo = PURPLE;
         else if (elementos[i].type == "animal") colorFondo = YELLOW;
-        
+
         DrawRectangle(x, y, elementoSize, elementoSize, colorFondo);
         DrawRectangleLines(x, y, elementoSize, elementoSize, BLACK);
 
@@ -192,7 +194,7 @@ void actualizarMinijuegoIntruso(Jugador &jugador)
     const char *entradaLabel = "Tu respuesta:";
     int anchoLabel = MeasureText(entradaLabel, 20);
     DrawText(entradaLabel, (screenWidth - anchoLabel) / 2, 300, 20, DARKGRAY);
-    
+
     int anchoEntrada = MeasureText(entradaUsuario, 30);
     DrawText(entradaUsuario, (screenWidth - anchoEntrada) / 2, 330, 30, DARKGREEN);
 
@@ -208,13 +210,13 @@ void actualizarMinijuegoIntruso(Jugador &jugador)
         const char *mensaje = gano ? "¡Correcto! Encontraste el intruso." : "Fallaste. El intruso era:";
         int anchoMensaje = MeasureText(mensaje, 25);
         DrawText(mensaje, (screenWidth - anchoMensaje) / 2, 420, 25, gano ? DARKGREEN : RED);
-        
+
         if (!gano)
         {
             int anchoIntruso = MeasureText(intruso.value.c_str(), 30);
             DrawText(intruso.value.c_str(), (screenWidth - anchoIntruso) / 2, 450, 30, DARKGRAY);
         }
-        
+
         const char *continuar = "Presiona ENTER para continuar";
         int anchoContinuar = MeasureText(continuar, 20);
         DrawText(continuar, (screenWidth - anchoContinuar) / 2, 490, 20, BLACK);
@@ -236,4 +238,4 @@ bool minijuegoIntrusoTerminado()
 bool minijuegoIntrusoGano()
 {
     return gano;
-} 
+}
