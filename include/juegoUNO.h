@@ -161,7 +161,7 @@ void aplicarCambioColor(Juego_UNO &juego);
 void aplicarBloqueo(Juego_UNO &juego);
 void aplicarCambioDireccion(Juego_UNO &juego);
 bool tieneCartaDelColor(Jugador &jugador, const string &colorObjetivo);
-
+bool minijuegoCambioDireccion(Juego_UNO &juego);
 // funciones de utilidad grafica
 ZonaVisual obtenerZonaVisual();
 
