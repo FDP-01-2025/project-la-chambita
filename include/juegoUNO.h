@@ -20,6 +20,7 @@ const int ESPACIO_X = 100;             // Espaciado horizontal entre cartas
 const int ESPACIO_Y = 100;             // Espaciado vertical entre cartas
 const int INICIO_X = 100;              // Posición inicial X para dibujar cartas
 const int INICIO_Y = 100;              // Posición inicial Y para dibujar cartas
+const int ESPACIO_ENTRE_MAZO_DESCARTE = 40; // espacio horizontal entre ellos
 
 // Tipos de cartas posibles en el juego UNO
 enum tipo_de_Carta
@@ -27,9 +28,9 @@ enum tipo_de_Carta
     Numero,           // Carta con valor numérico
     Carta_Mas_dos,    // Carta +2: el siguiente jugador roba dos cartas
     Carta_Mas_cuatro, // Carta +4: el siguiente jugador roba cuatro cartas y cambia color
-    Cambio_color,    // Cambia el color actual del juego
+    Cambio_color,     // Cambia el color actual del juego
     Cambio_direccion, // Invierte el sentido de juego
-    Carta_Bloqueo , 
+    Carta_Bloqueo,
 };
 
 // Estados posibles de la partida
@@ -46,11 +47,11 @@ enum estado_de_juego
 enum tipo_minijuego
 {
     ninguno,
-    ordenar_palabra,     // Para +4 y Cambio_color
-    encontrar_intruso,   // Para +2
-    velocidad,           // Para Bloqueo
-    matematico,          // Para Cambio_direccion
-    reflejos             // Para +2 (alternativo)
+    ordenar_palabra,   // Para +4 y Cambio_color
+    encontrar_intruso, // Para +2
+    velocidad,         // Para Bloqueo
+    matematico,        // Para Cambio_direccion
+    reflejos           // Para +2 (alternativo)
 };
 
 // Estructura que representa una carta del juego UNO
@@ -96,8 +97,15 @@ struct Juego_UNO
 
     string colorForzado; // Color forzado por una carta especial (ej: +4 o cambio de color)
 
-     Carta cartaPendiente; // Carta pendiente de jugar en un minijuego o acción especial
+    Carta cartaPendiente;           // Carta pendiente de jugar en un minijuego o acción especial
     tipo_minijuego minijuegoActivo; // Tipo de minijuego actualmente activo
+};
+
+enum MenuResult
+{
+    MENU_NONE,
+    MENU_JUGAR,
+    MENU_CERRAR
 };
 
 // Estructura para definir las zonas visuales donde se dibujan las cartas en la interfaz gráfica
@@ -126,7 +134,7 @@ Carta robarCartaValida(Juego_UNO &juego);
 void actualizarVisibilidadCartas(Juego_UNO &juego);
 
 // logica y turnos de jugabilidad
-void mostrarMenuPrincipal(); //menu principal
+MenuResult MenuPrincipal(); // menu principal
 void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorActual, string &entradaActual, bool &nombresCompletos);
 void dibujarCartasJugador(const Jugador &jugador, int xInicial, int yInicial, bool mostrarTodas);
 void dibujarZonaDescarte(const Carta &carta, int x, int y);
@@ -138,7 +146,7 @@ bool cartaTuvoDobleClick(const Rectangle &rect);
 void intentarRobarYCambiarTurno(Juego_UNO &juego);
 Carta cartaInicial(Juego_UNO &juego);
 void guardarEstadisticas(const Juego_UNO &juego, const string &EstadisticaArchivo);
-//chequeo ganador
+// chequeo ganador
 bool jugadorSinCartas(const Jugador &jugador);
 bool ejecutarMinijuegoReflejos(Juego_UNO &juego);
 void aplicarMasDos(Juego_UNO &juego, int objetivo);
@@ -152,8 +160,7 @@ void aplicarMasCuatro(Juego_UNO &juego);
 void aplicarCambioColor(Juego_UNO &juego);
 void aplicarBloqueo(Juego_UNO &juego);
 void aplicarCambioDireccion(Juego_UNO &juego);
-
-
+bool tieneCartaDelColor(Jugador &jugador, const string &colorObjetivo);
 
 // funciones de utilidad grafica
 ZonaVisual obtenerZonaVisual();
