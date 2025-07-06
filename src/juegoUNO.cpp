@@ -309,7 +309,18 @@ Carta robarCartaValida(Juego_UNO &juego)
         avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
     }
 
-    return Carta{}; // No se necesita devolver la carta realmente
+    return cartaRobada; // Retorna la carta robada
+}
+
+// Función simple para robar una carta sin cambiar el turno (para penalizaciones)
+Carta robarCartaSimple(Juego_UNO &juego)
+{
+    if (juego.cartasEnMazo <= 0)
+        return Carta{}; // No hay cartas en el mazo
+
+    Carta cartaRobada = juego.mazo[--juego.cartasEnMazo];
+    cartaRobada.visible = true;
+    return cartaRobada;
 }
 
 // Actualiza la visibilidad de las cartas: solo el jugador en turno ve sus cartas.
@@ -632,7 +643,21 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                         {
                             // Si gana +2, el siguiente jugador roba 2 cartas
                             int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
-                            aplicarMasDos(juego, jugadorPenalizado);
+                            for (int i = 0; i < 2; i++)
+                            {
+                                Carta cartaRobada = robarCartaSimple(juego);
+                                if (!cartaRobada.color.empty())
+                                {
+                                    for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+                                    {
+                                        if (juego.jugadores[jugadorPenalizado].mano[j].color.empty())
+                                        {
+                                            juego.jugadores[jugadorPenalizado].mano[j] = cartaRobada;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
                             avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
                         }
                         break;
@@ -643,7 +668,7 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                             int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
                             for (int i = 0; i < 4; i++)
                             {
-                                Carta cartaRobada = robarCartaValida(juego);
+                                Carta cartaRobada = robarCartaSimple(juego);
                                 if (!cartaRobada.color.empty())
                                 {
                                     for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
@@ -690,7 +715,38 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                         {
                             // Si pierde +2, el siguiente jugador roba 2 cartas Y el jugador actual roba 2 como penalización
                             int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
-                            aplicarMasDos(juego, jugadorPenalizado);
+                            // El siguiente jugador roba 2 cartas
+                            for (int i = 0; i < 2; i++)
+                            {
+                                Carta cartaRobada = robarCartaSimple(juego);
+                                if (!cartaRobada.color.empty())
+                                {
+                                    for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+                                    {
+                                        if (juego.jugadores[jugadorPenalizado].mano[j].color.empty())
+                                        {
+                                            juego.jugadores[jugadorPenalizado].mano[j] = cartaRobada;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            // El jugador actual roba 2 cartas como penalización
+                            for (int i = 0; i < 2; i++)
+                            {
+                                Carta cartaRobada = robarCartaSimple(juego);
+                                if (!cartaRobada.color.empty())
+                                {
+                                    for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+                                    {
+                                        if (juego.jugadores[juego.turno_actual].mano[j].color.empty())
+                                        {
+                                            juego.jugadores[juego.turno_actual].mano[j] = cartaRobada;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
                             avanzarTurno(juego.turno_actual, juego.direccion, juego.cantidadJugadores, juego);
                         }
                         break;
@@ -699,9 +755,10 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                         {
                             // Si pierde +4, el siguiente jugador roba 4 cartas Y el jugador actual roba 4 como penalización
                             int jugadorPenalizado = (juego.turno_actual + juego.direccion + juego.cantidadJugadores) % juego.cantidadJugadores;
+                            // El siguiente jugador roba 4 cartas
                             for (int i = 0; i < 4; i++)
                             {
-                                Carta cartaRobada = robarCartaValida(juego);
+                                Carta cartaRobada = robarCartaSimple(juego);
                                 if (!cartaRobada.color.empty())
                                 {
                                     for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
@@ -709,6 +766,22 @@ void ejecutarJuego(Juego_UNO &juego, bool &cantidadSeleccionada, int &jugadorAct
                                         if (juego.jugadores[jugadorPenalizado].mano[j].color.empty())
                                         {
                                             juego.jugadores[jugadorPenalizado].mano[j] = cartaRobada;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            // El jugador actual roba 4 cartas como penalización
+                            for (int i = 0; i < 4; i++)
+                            {
+                                Carta cartaRobada = robarCartaSimple(juego);
+                                if (!cartaRobada.color.empty())
+                                {
+                                    for (int j = 0; j < MAX_CARTAS_POR_JUGADOR; j++)
+                                    {
+                                        if (juego.jugadores[juego.turno_actual].mano[j].color.empty())
+                                        {
+                                            juego.jugadores[juego.turno_actual].mano[j] = cartaRobada;
                                             break;
                                         }
                                     }
