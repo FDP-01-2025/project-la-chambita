@@ -11,30 +11,30 @@ int main()
     // aqui va lo de raylib
     //dimesiones para joel 1366x768
     //dimesiones para aaron pantalla 1920x1080
-    InitWindow(1920, 1080, " UNO con minijuegos");
+    InitWindow(1920, 1080, " UNO with minijuegos");
     SetTargetFPS(30);
 
-    Juego_UNO juego = crearJuegoUNO();
+    UNO_Game game = createUNOGame();
 
-    bool cantidadSeleccionada;
-    int jugadorActual;
-    string entradaActual;
-    bool nombresCompletos;
+    bool amountSelected;
+    int currentPlayer;
+    string currentInput;
+    bool namesCompleted;
 
-    iniciarVariablesEstado(cantidadSeleccionada, jugadorActual, entradaActual, nombresCompletos);
-    inicializarMazo(juego);
-    barajarMazo(juego);
+    initStateVariables(amountSelected, currentPlayer, currentInput, namesCompleted);
+    initializeDeck(game);
+    shuffleDeck(game);
 
     //  Aquí se ejecuta todo el ciclo del juego
-    ejecutarJuego(juego, cantidadSeleccionada, jugadorActual, entradaActual, nombresCompletos);
+    runGame(game, amountSelected, currentPlayer, currentInput, namesCompleted);
 
     CloseWindow();
 
-    EstadisticasJugador stats;
+    PlayerStatistics stats;
 
     // Simulación al terminar una partida
-    bool jugadorGano = true;
-    int minijuegosEstaPartida = 2;
+    bool playerWon = true;
+    int minigamesThisGame = 2;
 
     return 0;
 }

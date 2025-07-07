@@ -2,7 +2,7 @@
 #define WORD_MINIGAME_H
 
 #include "raylib.h"
-#include "UNO_game.h"
+#include "juegoUNO.h"
 
 // Inicia el minijuego (elige palabra, mezcla, reinicia estado)
 void startWordOrderMinigame();

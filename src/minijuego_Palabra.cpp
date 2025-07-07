@@ -3,7 +3,7 @@
 #include <string>
 #include <ctime>
 #include <fstream>
-#include "../include/UNO_game.h"
+#include "../include/juegoUNO.h"
 #include <cstring>
 
 using namespace std;

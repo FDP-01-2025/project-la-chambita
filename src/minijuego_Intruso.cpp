@@ -3,7 +3,7 @@
 #include <ctime>
 #include <fstream>
 #include <cstring>
-#include "../include/UNO_game.h"
+#include "../include/juegoUNO.h"
 #include "../include/intruder_minigame.h"
 
 using namespace std;

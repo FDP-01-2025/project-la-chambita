@@ -2,7 +2,7 @@
 #define SPEED_MINIGAME_H
 
 #include "raylib.h"
-#include "UNO_game.h"
+#include "juegoUNO.h"
 
 // Inicia el minijuego de velocidad (reinicia estado)
 void startSpeedMinigame();

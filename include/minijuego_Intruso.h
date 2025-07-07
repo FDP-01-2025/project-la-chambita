@@ -2,12 +2,13 @@
 #define INTRUDER_MINIGAME_H
 
 #include "raylib.h"
-#include "UNO_game.h"
+#include "juegoUNO.h"
+using namespace std;
 
 // Estructura para elementos del juego
 struct Element {
-    std::string value;
-    std::string type;  // "number", "fruit", "color", "animal"
+    string value;
+    string type;  // "number", "fruit", "color", "animal"
 };
 
 // Inicia el minijuego (genera elementos, mezcla, reinicia estado)
