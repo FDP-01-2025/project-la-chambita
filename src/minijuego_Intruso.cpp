@@ -4,7 +4,7 @@
 #include <fstream>
 #include <cstring>
 #include "../include/juegoUNO.h"
-#include "../include/intruder_minigame.h"
+#include "../include/minijuego_Intruso.h"
 
 using namespace std;
 

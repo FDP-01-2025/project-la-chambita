@@ -3,7 +3,7 @@
 #include <ctime>
 #include <fstream>
 #include "../include/juegoUNO.h"
-#include "../include/speed_minigame.h"
+#include "../include/minijuego_Velocidad.h"
 
 using namespace std;
 
