@@ -1,129 +1,129 @@
-// minijuego_Palabra.cpp refactorizado
+// word_minigame.cpp refactorizado
 #include "raylib.h"
 #include <string>
 #include <ctime>
 #include <fstream>
-#include "../include/juegoUNO.h"
+#include "../include/UNO_game.h"
 #include <cstring>
 
 using namespace std;
 
 // Estado interno del minijuego
-static bool iniciado = false;
-static bool terminado = false;
-static bool gano = false;
-static int intentoLen = 0;
-static int intentos = 0;
-static const int maxIntentos = 3;
-static char intentoUsuario[21] = {0}; // +1 para null terminator
-static char palabraOriginal[21];
-static char palabraMezclada[21];
-static int longitud = 0;
-static int framesDesdeInicio = 0;
+static bool started = false;
+static bool finished = false;
+static bool won = false;
+static int attemptLen = 0;
+static int attempts = 0;
+static const int maxAttempts = 3;
+static char userAttempt[21] = {0}; // +1 para null terminator
+static char originalWord[21];
+static char mixedWord[21];
+static int length = 0;
+static int framesSinceStart = 0;
 
 // Guardar puntaje
-void guardarPuntaje(const string &palabra, int intentos)
+void saveScore(const string &word, int attempts)
 {
-    ofstream archivo("archivos/minijuego_palabra.txt", ios::app);
-    if (archivo.is_open())
+    ofstream file("archivos/minijuego_palabra.txt", ios::app);
+    if (file.is_open())
     {
-        archivo << "Palabra: " << palabra << "\n";
-        archivo << "Intentos: " << intentos << "\n";
-        archivo << "Resultado: GANASTE\n";
-        archivo << "----------------------\n";
-        archivo.close();
+        file << "Palabra: " << word << "\n";
+        file << "Intentos: " << attempts << "\n";
+        file << "Resultado: GANASTE\n";
+        file << "----------------------\n";
+        file.close();
     }
 }
 
 // Mezclar palabra (Fisher-Yates), asegurando que no sea igual a la original
-void mezclarPalabra(char palabra[], int length)
+void mixWord(char word[], int length)
 {
     if (length <= 1)
         return;
     char original[21];
-    strcpy(original, palabra);
+    strcpy(original, word);
     do
     {
         for (int i = length - 1; i > 0; i--)
         {
             int j = rand() % (i + 1);
-            char temp = palabra[i];
-            palabra[i] = palabra[j];
-            palabra[j] = temp;
+            char temp = word[i];
+            word[i] = word[j];
+            word[j] = temp;
         }
-    } while (strcmp(original, palabra) == 0 && length > 1);
+    } while (strcmp(original, word) == 0 && length > 1);
 }
 
 // Inicializar minijuego
-void iniciarOrdenaPalabra()
+void startWordOrderMinigame()
 {
-    const char *palabras[] = {"computadora", "programacion", "algoritmo", "variable", "funcion"};
-    int indice = rand() % 5;
+    const char *words[] = {"computadora", "programacion", "algoritmo", "variable", "funcion"};
+    int index = rand() % 5;
 
-    strcpy(palabraOriginal, palabras[indice]);
-    longitud = strlen(palabraOriginal);
-    strcpy(palabraMezclada, palabraOriginal);
-    mezclarPalabra(palabraMezclada, longitud);
+    strcpy(originalWord, words[index]);
+    length = strlen(originalWord);
+    strcpy(mixedWord, originalWord);
+    mixWord(mixedWord, length);
 
-    intentoLen = 0;
-    intentoUsuario[0] = '\0';
-    intentos = 0;
-    terminado = false;
-    gano = false;
-    iniciado = true;
-    framesDesdeInicio = 0;
+    attemptLen = 0;
+    userAttempt[0] = '\0';
+    attempts = 0;
+    finished = false;
+    won = false;
+    started = true;
+    framesSinceStart = 0;
 }
 
 // Actualizar lógica y dibujar minijuego
-void actualizarMinijuegoOrdenaPalabra(Jugador &jugador)
+void updateWordOrderMinigame(Player &player)
 {
-    if (!iniciado)
+    if (!started)
         return;
 
     // Solo cuenta frames cuando está iniciado
-    framesDesdeInicio++;
+    framesSinceStart++;
 
     // Visual
     ClearBackground(RAYWHITE);
 
     // Entrada de texto solo si no ha terminado
-    if (!terminado)
+    if (!finished)
     {
         int key = GetCharPressed();
         while (key > 0)
         {
-            if (intentoLen < longitud && intentoLen < 20 && key >= 32 && key <= 125)
+            if (attemptLen < length && attemptLen < 20 && key >= 32 && key <= 125)
             {
-                intentoUsuario[intentoLen++] = (char)key;
-                intentoUsuario[intentoLen] = '\0';
+                userAttempt[attemptLen++] = (char)key;
+                userAttempt[attemptLen] = '\0';
             }
             key = GetCharPressed();
         }
-        if (IsKeyPressed(KEY_BACKSPACE) && intentoLen > 0)
+        if (IsKeyPressed(KEY_BACKSPACE) && attemptLen > 0)
         {
-            intentoLen--;
-            intentoUsuario[intentoLen] = '\0';
+            attemptLen--;
+            userAttempt[attemptLen] = '\0';
         }
 
         if (IsKeyPressed(KEY_ENTER))
         {
-            intentos++;
-            bool iguales = strcmp(intentoUsuario, palabraOriginal) == 0;
+            attempts++;
+            bool equal = strcmp(userAttempt, originalWord) == 0;
 
-            if (iguales)
+            if (equal)
             {
-                gano = true;
-                terminado = true;
-                guardarPuntaje(palabraOriginal, intentos);
+                won = true;
+                finished = true;
+                saveScore(originalWord, attempts);
             }
-            else if (intentos >= maxIntentos)
+            else if (attempts >= maxAttempts)
             {
-                terminado = true;
+                finished = true;
             }
             else
             {
-                intentoLen = 0;
-                intentoUsuario[0] = '\0';
+                attemptLen = 0;
+                userAttempt[0] = '\0';
             }
         }
     }
@@ -131,47 +131,47 @@ void actualizarMinijuegoOrdenaPalabra(Jugador &jugador)
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
 
-    const char *titulo = "Ordena la palabra:";
-    int anchoTitulo = MeasureText(titulo, 30);
-    DrawText(titulo, (screenWidth - anchoTitulo) / 2, 100, 30, DARKGRAY);
-    int anchoPalabra = MeasureText(palabraMezclada, 40);
-    DrawText(palabraMezclada, (screenWidth - anchoPalabra) / 2, 160, 40, BLUE);
-    const char *intentoLabel = "Tu intento:";
-    int anchoLabel = MeasureText(intentoLabel, 20);
-    DrawText(intentoLabel, (screenWidth - anchoLabel) / 2, 230, 20, DARKGRAY);
-    int anchoIntento = MeasureText(intentoUsuario, 40);
-    DrawText(intentoUsuario, (screenWidth - anchoIntento) / 2, 260, 40, DARKGREEN);
+    const char *title = "Ordena la palabra:";
+    int titleWidth = MeasureText(title, 30);
+    DrawText(title, (screenWidth - titleWidth) / 2, 100, 30, DARKGRAY);
+    int wordWidth = MeasureText(mixedWord, 40);
+    DrawText(mixedWord, (screenWidth - wordWidth) / 2, 160, 40, BLUE);
+    const char *attemptLabel = "Tu intento:";
+    int labelWidth = MeasureText(attemptLabel, 20);
+    DrawText(attemptLabel, (screenWidth - labelWidth) / 2, 230, 20, DARKGRAY);
+    int attemptWidth = MeasureText(userAttempt, 40);
+    DrawText(userAttempt, (screenWidth - attemptWidth) / 2, 260, 40, DARKGREEN);
 
-    char textoIntentos[50];
-    sprintf(textoIntentos, "Intentos: %d / %d", intentos, maxIntentos);
-    int anchoIntentos = MeasureText(textoIntentos, 20);
-    DrawText(textoIntentos, (screenWidth - anchoIntentos) / 2, 320, 20, DARKGRAY);
+    char attemptsText[50];
+    sprintf(attemptsText, "Intentos: %d / %d", attempts, maxAttempts);
+    int attemptsWidth = MeasureText(attemptsText, 20);
+    DrawText(attemptsText, (screenWidth - attemptsWidth) / 2, 320, 20, DARKGRAY);
 
-    if (terminado && framesDesdeInicio > 1)
+    if (finished && framesSinceStart > 1)
     {
-        const char *mensaje = gano ? "¡Correcto!" : "Fallaste";
-        int anchoMensaje = MeasureText(mensaje, 30);
-        DrawText(mensaje, (screenWidth - anchoMensaje) / 2, 370, 30, gano ? DARKGREEN : RED);
-        const char *continuar = "Presiona ENTER para continuar";
-        int anchoContinuar = MeasureText(continuar, 20);
-        DrawText(continuar, (screenWidth - anchoContinuar) / 2, 420, 20, BLACK);
+        const char *message = won ? "¡Correcto!" : "Fallaste";
+        int messageWidth = MeasureText(message, 30);
+        DrawText(message, (screenWidth - messageWidth) / 2, 370, 30, won ? DARKGREEN : RED);
+        const char *continueText = "Presiona ENTER para continuar";
+        int continueWidth = MeasureText(continueText, 20);
+        DrawText(continueText, (screenWidth - continueWidth) / 2, 420, 20, BLACK);
 
         // Solo permite salir después de mostrar el mensaje al menos un frame
-        if (IsKeyPressed(KEY_ENTER) && framesDesdeInicio > 10)
+        if (IsKeyPressed(KEY_ENTER) && framesSinceStart > 10)
         {
-            iniciado = false;
+            started = false;
         }
     }
 }
 
 // Verificar si ya terminó
-bool minijuegoOrdenaTerminado()
+bool wordOrderMinigameFinished()
 {
-    return terminado;
+    return finished;
 }
 
 // Verificar si ganó
-bool minijuegoOrdenaGano()
+bool wordOrderMinigameWon()
 {
-    return gano;
+    return won;
 }

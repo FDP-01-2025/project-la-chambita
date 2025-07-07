@@ -2,70 +2,70 @@
 #include <string>
 #include <ctime>
 #include <fstream>
-#include "../include/juegoUNO.h"
-#include "../include/minijuego_Velocidad.h"
+#include "../include/UNO_game.h"
+#include "../include/speed_minigame.h"
 
 using namespace std;
 
 // Estado interno del minijuego
-static bool iniciado = false;
-static bool terminado = false;
-static bool gano = false;
-static float tiempoLimite = 2.0f; // 2 segundos para reaccionar
-static float tiempoTranscurrido = 0.0f;
-static char teclaCorrecta = 'A';
-static int framesDesdeInicio = 0;
+static bool started = false;
+static bool finished = false;
+static bool won = false;
+static float timeLimit = 2.0f; // 2 segundos para reaccionar
+static float elapsedTime = 0.0f;
+static char correctKey = 'A';
+static int framesSinceStart = 0;
 
 // Guardar puntaje
-void guardarPuntajeVelocidad(char tecla, bool gano, float tiempo)
+void saveSpeedScore(char key, bool won, float time)
 {
-    ofstream archivo("archivos/minijuego_velocidad.txt", ios::app);
-    if (archivo.is_open())
+    ofstream file("archivos/minijuego_velocidad.txt", ios::app);
+    if (file.is_open())
     {
-        archivo << "Tecla presionada: " << tecla << "\n";
-        archivo << "Tiempo usado: " << tiempo << "s\n";
-        archivo << "Resultado: " << (gano ? "GANASTE" : "PERDISTE") << "\n";
-        archivo << "----------------------\n";
-        archivo.close();
+        file << "Tecla presionada: " << key << "\n";
+        file << "Tiempo usado: " << time << "s\n";
+        file << "Resultado: " << (won ? "GANASTE" : "PERDISTE") << "\n";
+        file << "----------------------\n";
+        file.close();
     }
 }
 
 // Inicializar minijuego
-void iniciarMinijuegoVelocidad()
+void startSpeedMinigame()
 {
-    teclaCorrecta = 'A' + GetRandomValue(0, 25);
-    tiempoTranscurrido = 0.0f;
-    terminado = false;
-    gano = false;
-    iniciado = true;
-    framesDesdeInicio = 0;
+    correctKey = 'A' + GetRandomValue(0, 25);
+    elapsedTime = 0.0f;
+    finished = false;
+    won = false;
+    started = true;
+    framesSinceStart = 0;
 }
 
 // Actualizar lógica y dibujar minijuego
-void actualizarMinijuegoVelocidad(Jugador &jugador)
+void updateSpeedMinigame(Player &player)
 {
-    if (!iniciado)
+    if (!started)
         return;
 
-    framesDesdeInicio++;
+    framesSinceStart++;
     float deltaTime = GetFrameTime();
 
-    if (!terminado)
+    if (!finished)
     {
-        tiempoTranscurrido += deltaTime;
+        elapsedTime += deltaTime;
 
         // Verificar si se presionó la tecla correcta
-        if (IsKeyPressed((int)teclaCorrecta))
+        if (IsKeyPressed((int)correctKey))
         {
-            gano = true;
-            terminado = true;
-            guardarPuntajeVelocidad(teclaCorrecta, true, tiempoTranscurrido);
+            won = true;
+            finished = true;
+            saveSpeedScore(correctKey, true, elapsedTime);
         }
         // Verificar si se acabó el tiempo
-        else if (tiempoTranscurrido >= tiempoLimite)
+        else if (elapsedTime >= timeLimit)
         {
-            terminado = true;
-            guardarPuntajeVelocidad(teclaCorrecta, false, tiempoLimite);
+            finished = true;
+            saveSpeedScore(correctKey, false, timeLimit);
         }
     }
 
@@ -75,77 +75,77 @@ void actualizarMinijuegoVelocidad(Jugador &jugador)
     int screenHeight = GetScreenHeight();
 
     // Título
-    const char *titulo = "¡MINIJUEGO DE VELOCIDAD!";
-    int anchoTitulo = MeasureText(titulo, 40);
-    DrawText(titulo, (screenWidth - anchoTitulo) / 2, 100, 40, YELLOW);
+    const char *title = "¡MINIJUEGO DE VELOCIDAD!";
+    int titleWidth = MeasureText(title, 40);
+    DrawText(title, (screenWidth - titleWidth) / 2, 100, 40, YELLOW);
 
     // Instrucciones
-    const char *instrucciones = "Presiona la tecla que aparece en pantalla lo más rápido posible";
-    int anchoInstrucciones = MeasureText(instrucciones, 25);
-    DrawText(instrucciones, (screenWidth - anchoInstrucciones) / 2, 180, 25, LIGHTGRAY);
+    const char *instructions = "Presiona la tecla que aparece en pantalla lo más rápido posible";
+    int instructionsWidth = MeasureText(instructions, 25);
+    DrawText(instructions, (screenWidth - instructionsWidth) / 2, 180, 25, LIGHTGRAY);
 
     // Mostrar la tecla a presionar
-    char teclaStr[2] = {teclaCorrecta, '\0'};
-    int anchoTecla = MeasureText(teclaStr, 80);
-    DrawText(teclaStr, (screenWidth - anchoTecla) / 2, 250, 80, WHITE);
+    char keyStr[2] = {correctKey, '\0'};
+    int keyWidth = MeasureText(keyStr, 80);
+    DrawText(keyStr, (screenWidth - keyWidth) / 2, 250, 80, WHITE);
 
     // Tiempo restante
-    float tiempoRestante = tiempoLimite - tiempoTranscurrido;
-    if (tiempoRestante < 0) tiempoRestante = 0;
+    float timeLeft = timeLimit - elapsedTime;
+    if (timeLeft < 0) timeLeft = 0;
 
-    char tiempoStr[50];
-    sprintf(tiempoStr, "Tiempo restante: %.1f", tiempoRestante);
-    int anchoTiempo = MeasureText(tiempoStr, 30);
-    DrawText(tiempoStr, (screenWidth - anchoTiempo) / 2, 350, 30, RED);
+    char timeStr[50];
+    sprintf(timeStr, "Tiempo restante: %.1f", timeLeft);
+    int timeWidth = MeasureText(timeStr, 30);
+    DrawText(timeStr, (screenWidth - timeWidth) / 2, 350, 30, RED);
 
     // Barra de progreso del tiempo
-    float progreso = tiempoTranscurrido / tiempoLimite;
-    if (progreso > 1.0f) progreso = 1.0f;
+    float progress = elapsedTime / timeLimit;
+    if (progress > 1.0f) progress = 1.0f;
 
-    int barraWidth = 400;
-    int barraHeight = 20;
-    int barraX = (screenWidth - barraWidth) / 2;
-    int barraY = 400;
+    int barWidth = 400;
+    int barHeight = 20;
+    int barX = (screenWidth - barWidth) / 2;
+    int barY = 400;
 
     // Fondo de la barra
-    DrawRectangle(barraX, barraY, barraWidth, barraHeight, DARKGRAY);
+    DrawRectangle(barX, barY, barWidth, barHeight, DARKGRAY);
     // Progreso de la barra
-    DrawRectangle(barraX, barraY, (int)(barraWidth * progreso), barraHeight, RED);
+    DrawRectangle(barX, barY, (int)(barWidth * progress), barHeight, RED);
 
     // Mensaje de resultado
-    if (terminado)
+    if (finished)
     {
-        const char *mensaje = gano ? "¡Excelente! Presionaste la tecla a tiempo." : "¡Demasiado lento! Se acabó el tiempo.";
-        int anchoMensaje = MeasureText(mensaje, 25);
-        DrawText(mensaje, (screenWidth - anchoMensaje) / 2, 450, 25, gano ? DARKGREEN : RED);
+        const char *message = won ? "¡Excelente! Presionaste la tecla a tiempo." : "¡Demasiado lento! Se acabó el tiempo.";
+        int messageWidth = MeasureText(message, 25);
+        DrawText(message, (screenWidth - messageWidth) / 2, 450, 25, won ? DARKGREEN : RED);
 
-        if (gano)
+        if (won)
         {
-            char tiempoUsadoStr[50];
-            sprintf(tiempoUsadoStr, "Tiempo usado: %.2f segundos", tiempoTranscurrido);
-            int anchoTiempoUsado = MeasureText(tiempoUsadoStr, 20);
-            DrawText(tiempoUsadoStr, (screenWidth - anchoTiempoUsado) / 2, 480, 20, LIGHTGRAY);
+            char usedTimeStr[50];
+            sprintf(usedTimeStr, "Tiempo usado: %.2f segundos", elapsedTime);
+            int usedTimeWidth = MeasureText(usedTimeStr, 20);
+            DrawText(usedTimeStr, (screenWidth - usedTimeWidth) / 2, 480, 20, LIGHTGRAY);
         }
 
-        const char *continuar = "Presiona ENTER para continuar";
-        int anchoContinuar = MeasureText(continuar, 20);
-        DrawText(continuar, (screenWidth - anchoContinuar) / 2, 520, 20, WHITE);
+        const char *continueText = "Presiona ENTER para continuar";
+        int continueWidth = MeasureText(continueText, 20);
+        DrawText(continueText, (screenWidth - continueWidth) / 2, 520, 20, WHITE);
 
         if (IsKeyPressed(KEY_ENTER))
         {
-            iniciado = false;
+            started = false;
         }
     }
 }
 
 // Verificar si ya terminó
-bool minijuegoVelocidadTerminado()
+bool speedMinigameFinished()
 {
-    return terminado;
+    return finished;
 }
 
 // Verificar si ganó
-bool minijuegoVelocidadGano()
+bool speedMinigameWon()
 {
-    return gano;
+    return won;
 }

@@ -1,19 +1,19 @@
-#ifndef MINIJUEGO_VELOCIDAD_H
-#define MINIJUEGO_VELOCIDAD_H
+#ifndef SPEED_MINIGAME_H
+#define SPEED_MINIGAME_H
 
 #include "raylib.h"
-#include "juegoUNO.h"
+#include "UNO_game.h"
 
 // Inicia el minijuego de velocidad (reinicia estado)
-void iniciarMinijuegoVelocidad();
+void startSpeedMinigame();
 
 // Actualiza lógica y dibuja todo el minijuego (se llama en cada frame)
-void actualizarMinijuegoVelocidad(Jugador &jugador);
+void updateSpeedMinigame(Player &player);
 
 // Devuelve true si el minijuego ya terminó (gane o pierda)
-bool minijuegoVelocidadTerminado();
+bool speedMinigameFinished();
 
 // Devuelve true si el jugador ganó (presionó la tecla a tiempo)
-bool minijuegoVelocidadGano();
+bool speedMinigameWon();
 
 #endif 

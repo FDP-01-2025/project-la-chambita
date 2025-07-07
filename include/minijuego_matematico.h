@@ -1,6 +1,6 @@
-#ifndef MINIJUEGO_MATEMATICO_H
-#define MINIJUEGO_MATEMATICO_H
+#ifndef MATH_MINIGAME_H
+#define MATH_MINIGAME_H
 
-bool jugarMinijuegoMatematico();
+bool playMathMinigame();
 
 #endif

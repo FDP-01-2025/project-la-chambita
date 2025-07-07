@@ -3,40 +3,40 @@
 #include <ctime>
 #include <fstream>
 #include <cstring>
-#include "../include/juegoUNO.h"
-#include "../include/minijuego_Intruso.h"
+#include "../include/UNO_game.h"
+#include "../include/intruder_minigame.h"
 
 using namespace std;
 
 // Estado interno del minijuego
-static bool iniciado = false;
-static bool terminado = false;
-static bool gano = false;
-static int intentos = 0;
-static const int maxIntentos = 2;
-static char entradaUsuario[20] = {0};
-static int longitudEntrada = 0;
-static Element elementos[4];
-static Element intruso;
-static int tamano = 4;
-static int framesDesdeInicio = 0;
+static bool started = false;
+static bool finished = false;
+static bool won = false;
+static int attempts = 0;
+static const int maxAttempts = 2;
+static char userInput[20] = {0};
+static int inputLength = 0;
+static Element elements[4];
+static Element intruder;
+static int size = 4;
+static int framesSinceStart = 0;
 
 // Guardar puntaje
-void guardarPuntajeIntruso(const string &intrusoEncontrado, int intentos)
+void saveIntruderScore(const string &foundIntruder, int attempts)
 {
-    ofstream archivo("archivos/minijuego_intruso.txt", ios::app);
-    if (archivo.is_open())
+    ofstream file("archivos/minijuego_intruso.txt", ios::app);
+    if (file.is_open())
     {
-        archivo << "Intruso encontrado: " << intrusoEncontrado << "\n";
-        archivo << "Intentos: " << intentos << "\n";
-        archivo << "Resultado: GANASTE\n";
-        archivo << "----------------------\n";
-        archivo.close();
+        file << "Intruso encontrado: " << foundIntruder << "\n";
+        file << "Intentos: " << attempts << "\n";
+        file << "Resultado: GANASTE\n";
+        file << "----------------------\n";
+        file.close();
     }
 }
 
 // Generar elementos aleatorios
-void generarElementosAleatorios(Element arr[], int& size, Element& intruso) {
+void generateRandomElements(Element arr[], int& size, Element& intruder) {
     string numbers[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
     string fruits[] = {"apple", "pear", "grape", "orange", "banana", "strawberry", "kiwi", "mango"};
     string colors[] = {"red", "blue", "green", "yellow", "purple", "pink", "orange", "black"};
@@ -72,80 +72,80 @@ void generarElementosAleatorios(Element arr[], int& size, Element& intruso) {
 
     // Asignar el intruso
     if (intruderType == "number") {
-        intruso.value = numbers[rand() % 10];
-        intruso.type = "number";
+        intruder.value = numbers[rand() % 10];
+        intruder.type = "number";
     } else if (intruderType == "fruit") {
-        intruso.value = fruits[rand() % 8];
-        intruso.type = "fruit";
+        intruder.value = fruits[rand() % 8];
+        intruder.type = "fruit";
     } else if (intruderType == "color") {
-        intruso.value = colors[rand() % 8];
-        intruso.type = "color";
+        intruder.value = colors[rand() % 8];
+        intruder.type = "color";
     } else {
-        intruso.value = animals[rand() % 8];
-        intruso.type = "animal";
+        intruder.value = animals[rand() % 8];
+        intruder.type = "animal";
     }
 
     // Colocar el intruso en una posición aleatoria
     int intruderPosition = rand() % size;
-    arr[intruderPosition] = intruso;
+    arr[intruderPosition] = intruder;
 }
 
 // Inicializar minijuego
-void iniciarMinijuegoIntruso()
+void startIntruderMinigame()
 {
-    generarElementosAleatorios(elementos, tamano, intruso);
+    generateRandomElements(elements, size, intruder);
 
-    longitudEntrada = 0;
-    entradaUsuario[0] = '\0';
-    intentos = 0;
-    terminado = false;
-    gano = false;
-    iniciado = true;
-    framesDesdeInicio = 0;
+    inputLength = 0;
+    userInput[0] = '\0';
+    attempts = 0;
+    finished = false;
+    won = false;
+    started = true;
+    framesSinceStart = 0;
 }
 
 // Actualizar lógica y dibujar minijuego
-void actualizarMinijuegoIntruso(Jugador &jugador)
+void updateIntruderMinigame(Player &player)
 {
-    framesDesdeInicio++;
-    if (!iniciado)
+    framesSinceStart++;
+    if (!started)
         return;
 
     ClearBackground(RAYWHITE);
 
     // Entrada de texto
     int key = GetCharPressed();
-    if (key > 0 && longitudEntrada < 19)
+    if (key > 0 && inputLength < 19)
     {
-        entradaUsuario[longitudEntrada++] = (char)key;
-        entradaUsuario[longitudEntrada] = '\0';
+        userInput[inputLength++] = (char)key;
+        userInput[inputLength] = '\0';
     }
 
-    if (IsKeyPressed(KEY_BACKSPACE) && longitudEntrada > 0)
+    if (IsKeyPressed(KEY_BACKSPACE) && inputLength > 0)
     {
-        longitudEntrada--;
-        entradaUsuario[longitudEntrada] = '\0';
+        inputLength--;
+        userInput[inputLength] = '\0';
     }
 
-    if (IsKeyPressed(KEY_ENTER) && longitudEntrada > 0)
+    if (IsKeyPressed(KEY_ENTER) && inputLength > 0)
     {
-        intentos++;
-        bool correcto = (string(entradaUsuario) == intruso.value);
+        attempts++;
+        bool correct = (string(userInput) == intruder.value);
 
-        if (correcto)
+        if (correct)
         {
-            gano = true;
-            terminado = true;
-            guardarPuntajeIntruso(intruso.value, intentos);
+            won = true;
+            finished = true;
+            saveIntruderScore(intruder.value, attempts);
         }
-        else if (intentos >= maxIntentos)
+        else if (attempts >= maxAttempts)
         {
-            terminado = true;
+            finished = true;
         }
         else
         {
-            longitudEntrada = 0;
-            entradaUsuario[0] = '\0';
+            inputLength = 0;
+            userInput[0] = '\0';
         }
     }
 
@@ -153,89 +153,89 @@ void actualizarMinijuegoIntruso(Jugador &jugador)
     int screenHeight = GetScreenHeight();
 
     // Título
-    const char *titulo = "Encuentra el intruso:";
-    int anchoTitulo = MeasureText(titulo, 30);
-    DrawText(titulo, (screenWidth - anchoTitulo) / 2, 50, 30, DARKGRAY);
+    const char *title = "Encuentra el intruso:";
+    int titleWidth = MeasureText(title, 30);
+    DrawText(title, (screenWidth - titleWidth) / 2, 50, 30, DARKGRAY);
 
     // Instrucciones
-    const char *instrucciones = "Hay 4 elementos, uno es diferente. Encuentra el intruso:";
-    int anchoInstrucciones = MeasureText(instrucciones, 20);
-    DrawText(instrucciones, (screenWidth - anchoInstrucciones) / 2, 100, 20, DARKGRAY);
+    const char *instructions = "Hay 4 elementos, uno es diferente. Encuentra el intruso:";
+    int instructionsWidth = MeasureText(instructions, 20);
+    DrawText(instructions, (screenWidth - instructionsWidth) / 2, 100, 20, DARKGRAY);
 
     // Mostrar elementos en una cuadrícula
-    int elementoSize = 120;
-    int espacio = 20;
-    int inicioX = (screenWidth - (4 * elementoSize + 3 * espacio)) / 2;
-    int inicioY = 150;
+    int elementSize = 120;
+    int spacing = 20;
+    int startX = (screenWidth - (4 * elementSize + 3 * spacing)) / 2;
+    int startY = 150;
 
-    for (int i = 0; i < tamano; i++)
+    for (int i = 0; i < size; i++)
     {
-        int x = inicioX + i * (elementoSize + espacio);
-        int y = inicioY;
+        int x = startX + i * (elementSize + spacing);
+        int y = startY;
 
         // Fondo del elemento
-        Color colorFondo = LIGHTGRAY;
-        if (elementos[i].type == "number") colorFondo = SKYBLUE;
-        else if (elementos[i].type == "fruit") colorFondo = GREEN;
-        else if (elementos[i].type == "color") colorFondo = PURPLE;
-        else if (elementos[i].type == "animal") colorFondo = YELLOW;
+        Color bgColor = LIGHTGRAY;
+        if (elements[i].type == "number") bgColor = SKYBLUE;
+        else if (elements[i].type == "fruit") bgColor = GREEN;
+        else if (elements[i].type == "color") bgColor = PURPLE;
+        else if (elements[i].type == "animal") bgColor = YELLOW;
 
-        DrawRectangle(x, y, elementoSize, elementoSize, colorFondo);
-        DrawRectangleLines(x, y, elementoSize, elementoSize, BLACK);
+        DrawRectangle(x, y, elementSize, elementSize, bgColor);
+        DrawRectangleLines(x, y, elementSize, elementSize, BLACK);
 
         // Texto del elemento
-        int anchoTexto = MeasureText(elementos[i].value.c_str(), 20);
-        int textoX = x + (elementoSize / 2) - (anchoTexto / 2);
-        int textoY = y + (elementoSize / 2) - 10;
-        DrawText(elementos[i].value.c_str(), textoX, textoY, 20, BLACK);
+        int textWidth = MeasureText(elements[i].value.c_str(), 20);
+        int textX = x + (elementSize / 2) - (textWidth / 2);
+        int textY = y + (elementSize / 2) - 10;
+        DrawText(elements[i].value.c_str(), textX, textY, 20, BLACK);
     }
 
     // Entrada del usuario
-    const char *entradaLabel = "Tu respuesta:";
-    int anchoLabel = MeasureText(entradaLabel, 20);
-    DrawText(entradaLabel, (screenWidth - anchoLabel) / 2, 300, 20, DARKGRAY);
+    const char *inputLabel = "Tu respuesta:";
+    int labelWidth = MeasureText(inputLabel, 20);
+    DrawText(inputLabel, (screenWidth - labelWidth) / 2, 300, 20, DARKGRAY);
 
-    int anchoEntrada = MeasureText(entradaUsuario, 30);
-    DrawText(entradaUsuario, (screenWidth - anchoEntrada) / 2, 330, 30, DARKGREEN);
+    int inputWidth = MeasureText(userInput, 30);
+    DrawText(userInput, (screenWidth - inputWidth) / 2, 330, 30, DARKGREEN);
 
     // Intentos
-    char textoIntentos[50];
-    sprintf(textoIntentos, "Intentos: %d / %d", intentos, maxIntentos);
-    int anchoIntentos = MeasureText(textoIntentos, 20);
-    DrawText(textoIntentos, (screenWidth - anchoIntentos) / 2, 380, 20, DARKGRAY);
+    char attemptsText[50];
+    sprintf(attemptsText, "Intentos: %d / %d", attempts, maxAttempts);
+    int attemptsWidth = MeasureText(attemptsText, 20);
+    DrawText(attemptsText, (screenWidth - attemptsWidth) / 2, 380, 20, DARKGRAY);
 
     // Mensaje de resultado
-    if (terminado && framesDesdeInicio > 1)
+    if (finished && framesSinceStart > 1)
     {
-        const char *mensaje = gano ? "¡Correcto! Encontraste el intruso." : "Fallaste. El intruso era:";
-        int anchoMensaje = MeasureText(mensaje, 25);
-        DrawText(mensaje, (screenWidth - anchoMensaje) / 2, 420, 25, gano ? DARKGREEN : RED);
+        const char *message = won ? "¡Correcto! Encontraste el intruso." : "Fallaste. El intruso era:";
+        int messageWidth = MeasureText(message, 25);
+        DrawText(message, (screenWidth - messageWidth) / 2, 420, 25, won ? DARKGREEN : RED);
 
-        if (!gano)
+        if (!won)
         {
-            int anchoIntruso = MeasureText(intruso.value.c_str(), 30);
-            DrawText(intruso.value.c_str(), (screenWidth - anchoIntruso) / 2, 450, 30, DARKGRAY);
+            int intruderWidth = MeasureText(intruder.value.c_str(), 30);
+            DrawText(intruder.value.c_str(), (screenWidth - intruderWidth) / 2, 450, 30, DARKGRAY);
         }
 
-        const char *continuar = "Presiona ENTER para continuar";
-        int anchoContinuar = MeasureText(continuar, 20);
-        DrawText(continuar, (screenWidth - anchoContinuar) / 2, 490, 20, BLACK);
+        const char *continueText = "Presiona ENTER para continuar";
+        int continueWidth = MeasureText(continueText, 20);
+        DrawText(continueText, (screenWidth - continueWidth) / 2, 490, 20, BLACK);
 
         if (IsKeyPressed(KEY_ENTER))
         {
-            iniciado = false;
+            started = false;
         }
     }
 }
 
 // Verificar si ya terminó
-bool minijuegoIntrusoTerminado()
+bool intruderMinigameFinished()
 {
-    return terminado;
+    return finished;
 }
 
 // Verificar si ganó
-bool minijuegoIntrusoGano()
+bool intruderMinigameWon()
 {
-    return gano;
+    return won;
 }

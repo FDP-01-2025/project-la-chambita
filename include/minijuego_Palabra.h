@@ -1,18 +1,18 @@
-#ifndef MINIJUEGO_PALABRA_H
-#define MINIJUEGO_PALABRA_H
+#ifndef WORD_MINIGAME_H
+#define WORD_MINIGAME_H
 
 #include "raylib.h"
-#include "juegoUNO.h"
+#include "UNO_game.h"
 
 // Inicia el minijuego (elige palabra, mezcla, reinicia estado)
-void iniciarOrdenaPalabra();
+void startWordOrderMinigame();
 // Actualiza lógica y dibuja todo el minijuego (se llama en cada frame)
-void actualizarMinijuegoOrdenaPalabra(Jugador &jugador);
+void updateWordOrderMinigame(Player &player);
 
 // Devuelve true si el minijuego ya terminó (gane o pierda)
-bool minijuegoOrdenaTerminado();
+bool wordOrderMinigameFinished();
 
 // Devuelve true si el jugador ganó (ordenó correctamente la palabra)
-bool minijuegoOrdenaGano();
+bool wordOrderMinigameWon();
 
 #endif
