@@ -19,7 +19,7 @@ static int framesSinceStart = 0;
 // Guardar puntaje
 void saveSpeedScore(char key, bool won, float time)
 {
-    ofstream file("archivos/minijuego_velocidad.txt", ios::app);
+    ofstream file("assets/minijuego_velocidad.txt", ios::app);
     if (file.is_open())
     {
         file << "Tecla presionada: " << key << "\n";

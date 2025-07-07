@@ -18,7 +18,7 @@ static char userInput[20] = {0};
 static int inputLength = 0;
 static Element elements[4];
 static Element intruder;
-static int size = 4;
+static int elementsSize = 4;
 static int framesSinceStart = 0;
 
 // Guardar puntaje
@@ -93,7 +93,7 @@ void generateRandomElements(Element arr[], int& size, Element& intruder) {
 // Inicializar minijuego
 void startIntruderMinigame()
 {
-    generateRandomElements(elements, size, intruder);
+    generateRandomElements(elements, elementsSize, intruder);
 
     inputLength = 0;
     userInput[0] = '\0';
@@ -168,7 +168,7 @@ void updateIntruderMinigame(Player &player)
     int startX = (screenWidth - (4 * elementSize + 3 * spacing)) / 2;
     int startY = 150;
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < elementsSize; i++)
     {
         int x = startX + i * (elementSize + spacing);
         int y = startY;

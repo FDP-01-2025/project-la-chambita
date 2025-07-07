@@ -3,6 +3,7 @@
 #include <ctime>
 #include <cstring>
 #include <cctype>
+using namespace std;
 
 // Estructura para una pregunta con opciones
 struct Question {

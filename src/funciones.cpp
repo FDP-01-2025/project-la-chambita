@@ -1,4 +1,4 @@
-#include "../include/UNO_game.h"
+#include "../include/juegoUNO.h"
 
 //esta es la funcion para el turno del jugador en el juego UNO
 
@@ -48,12 +48,12 @@ void playerTurn(UNO_Game &game) {
     Card* hand = game.hands[player];
     Card currentCard = game.discardPile[game.discardTop - 1];
 
-    std::cout << "\n--- Player Turn " << player + 1 << " ---\n";
-    std::cout << "Card on discard: [" << currentCard.color << " " << currentCard.value << "]\n";
+    cout << "\n--- Player Turn " << player + 1 << " ---\n";
+    cout << "Card on discard: [" << currentCard.color << " " << currentCard.value << "]\n";
 
-    std::cout << "\nYour hand:\n";
+    cout << "\nYour hand:\n";
     for (int i = 0; i < count; ++i) {
-        std::cout << i + 1 << ". [" << hand[i].color << " " << hand[i].value << "]\n";
+        cout << i + 1 << ". [" << hand[i].color << " " << hand[i].value << "]\n";
     }
 
     // Verifica si puede jugar
@@ -68,16 +68,16 @@ void playerTurn(UNO_Game &game) {
     if (canPlayCard) {
         int option;
         do {
-            std::cout << "\nChoose the card number to play (0 to draw): ";
-            std::cin >> option;
+            cout << "\nChoose the card number to play (0 to draw): ";
+            cin >> option;
 
             if (option == 0) {
                 if (game.deckTop > 0) {
                     Card drawn = game.deck[--game.deckTop];
                     hand[count++] = drawn;
-                    std::cout << "You drew: [" << drawn.color << " " << drawn.value << "]\n";
+                    cout << "You drew: [" << drawn.color << " " << drawn.value << "]\n";
                 } else {
-                    std::cout << "The deck is empty. You can't draw.\n";
+                    cout << "The deck is empty. You can't draw.\n";
                 }
                 break;
             } else if (option > 0 && option <= count) {
