@@ -151,11 +151,11 @@ void initializeDeck(UNO_Game &game)
 }
 
 // Baraja el mazo de cartas using a random generator.
-void barajarMazo(UNO_Game &mazo)
+void shuffleDeck(UNO_Game &game)
 {
     random_device rd;
     mt19937 generador(rd());
-    shuffle(mazo.deck, mazo.deck + mazo.cardsInDeck, generador);
+    shuffle(game.deck, game.deck + game.cardsInDeck, generador);
 }
 
 // Dibuja botones para seleccionar la cantidad of players and detecta la selección.
@@ -258,8 +258,8 @@ void repartirCartas(UNO_Game &game)
 // Permite al player robar una carta and avanza the turno if no puede jugarla.
 void intentarRobarYCambiarTurno(UNO_Game &game)
 {
-    Card cartaRobada = robarCartaValida(game);
-    if (sePuedeJugar(game.cardInPlay, cartaRobada))
+    Card cartaRobada = drawValidCard(game);
+    if (canPlay(game.cardInPlay, cartaRobada))
     {
         game.cardInPlay = cartaRobada;
         // La carta robada se juega inmediatamente if es válida
@@ -278,8 +278,8 @@ void intentarRobarYCambiarTurno(UNO_Game &game)
         }
     }
 
-    avanzarTurno(game.currentTurn, game.direction, game.playerCount, game);
-    actualizarVisibilidadCartas(game);
+    advanceTurn(game.currentTurn, game.direction, game.playerCount, game);
+    updateCardVisibility(game);
 }
 
 // Verifica if the player has any playable card in their mano.
@@ -288,7 +288,7 @@ bool tieneCartaJugable(const Player &player, Card cardInPlay)
     for (int i = 0; i < MAX_CARDS_PER_PLAYER; i++)
     {
         const Card &c = player.hand[i];
-        if (!c.color.empty() && sePuedeJugar(cardInPlay, c))
+        if (!c.color.empty() && canPlay(cardInPlay, c))
         {
             return true;
         }
@@ -297,7 +297,7 @@ bool tieneCartaJugable(const Player &player, Card cardInPlay)
 }
 
 // Roba una carta del mazo and la devuelve. Si es jugable, la pone en juego.
-Card robarCartaValida(UNO_Game &game)
+Card drawValidCard(UNO_Game &game)
 {
     if (game.cardsInDeck <= 0)
         return Card{}; // No hay cartas en el mazo
@@ -306,7 +306,7 @@ Card robarCartaValida(UNO_Game &game)
     cartaRobada.visible = true;
 
     // Si la carta robada es jugable, se pone en juego
-    if (sePuedeJugar(game.cardInPlay, cartaRobada))
+    if (canPlay(game.cardInPlay, cartaRobada))
     {
         game.cardInPlay = cartaRobada;
     }
@@ -325,7 +325,7 @@ Card robarCartaValida(UNO_Game &game)
         }
 
         // Avanza the turno because no pudo jugar
-        avanzarTurno(game.currentTurn, game.direction, game.playerCount, game);
+        advanceTurn(game.currentTurn, game.direction, game.playerCount, game);
     }
 
     return cartaRobada; // Retorna la carta robada
@@ -343,7 +343,7 @@ Card robarCartaSimple(UNO_Game &game)
 }
 
 // Actualiza la visibilidad of the cards: only the player in turn sees their cards.
-void actualizarVisibilidadCartas(UNO_Game &game)
+void updateCardVisibility(UNO_Game &game)
 {
     for (int i = 0; i < game.playerCount; i++)
     {
@@ -406,7 +406,7 @@ MenuResult MenuPrincipal()
 }
 
 // Bucle principal del juego: gestiona the flujo of screens and turns.
-void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, string &currentInput, bool &namesCompleted)
+void runGame(UNO_Game &game, bool &amountSelected, int &currentPlayer, string &currentInput, bool &namesCompleted)
 {
     VisualZone zone = getVisualZone();
     bool enMenu = true;
@@ -466,11 +466,11 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                 if (game.gameState == WaitingPlayers)
                 {
                     initializeDeck(game);
-                    barajarMazo(game);
+                    shuffleDeck(game);
                     repartirCartas(game);
                     game.gameState = NormalTurn;
                     game.cardInPlay = cartaInicial(game);
-                    actualizarVisibilidadCartas(game);
+                    updateCardVisibility(game);
                 }
 
                 // Dibuja las cartas of each player in their position
@@ -480,14 +480,14 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                     int x = (i % 2 == 0) ? 100 : 1100; // Players pares izquierda, impares derecha
 
                     bool mostrar = (i == game.currentTurn);
-                    dibujarCartasJugador(game.players[i], x, y, mostrar);
+                    drawPlayerCards(game.players[i], x, y, mostrar);
                 }
 
                 // Dibuja el mazo and the zone of descarte
                 DrawRectangleRec(zone.deckZone, DARKGRAY);
                 DrawText("MAZO", zone.deckZone.x + 10, zone.deckZone.y + 60, 20, WHITE);
 
-                dibujarZonaDescarte(game.cardInPlay, zone.xDiscard, zone.yDiscard);
+                drawDiscardZone(game.cardInPlay, zone.xDiscard, zone.yDiscard);
 
                 Player &player = game.players[game.currentTurn];
 
@@ -524,7 +524,7 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                     Rectangle rect = {(float)cartaX, (float)cartaY, (float)CARD_WIDTH, (float)CARD_HEIGHT};
 
                     // Si el player hace double click on a valid card
-                    if (cartaTuvoDobleClick(rect))
+                    if (cardHadDoubleClick(rect))
                     {
                         // Validación especial for +4
                         if (carta.type == PlusFour && hasCardOfColor(player, game.cardInPlay.color))
@@ -534,7 +534,7 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                             continue;
                         }
 
-                        if (sePuedeJugar(game.cardInPlay, carta))
+                        if (canPlay(game.cardInPlay, carta))
                         {
                             // Se juega la carta
                             game.cardInPlay = carta;
@@ -563,18 +563,17 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                                 startWordOrderMinigame();
                                 break;
 
-                            case Skip:
-                                game.gameState = MinigameActive;
-                                game.activeMinigame = Speed;
-                                game.pendingCard = carta;
-                                startSpeedMinigame();
+                            case Skip: {
+                                int penalizedPlayer = (game.currentTurn + game.direction + game.playerCount) % game.playerCount;
+                                applyPlusTwoWithMinigame(game, penalizedPlayer, game.currentTurn);
                                 break;
+                            }
 
                             case Reverse:
                                 game.gameState = MinigameActive;
                                 game.activeMinigame = Math;
                                 game.pendingCard = carta;
-                                minigameReverse(game);
+                                runReflexesMinigame(game);
                                 break;
 
                             default:
@@ -585,8 +584,8 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
 
                             if (carta.type == Number)
                             {
-                                avanzarTurno(game.currentTurn, game.direction, game.playerCount, game);
-                                actualizarVisibilidadCartas(game);
+                                advanceTurn(game.currentTurn, game.direction, game.playerCount, game);
+                                updateCardVisibility(game);
                             }
 
                             break;
@@ -617,7 +616,7 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                             }
 
                             // Si la carta robada es jugable
-                            if (sePuedeJugar(game.cardInPlay, cartaRobada))
+                            if (canPlay(game.cardInPlay, cartaRobada))
                             {
                                 // Jugar la carta robada (como si fuera double click)
                                 game.cardInPlay = cartaRobada;
@@ -640,17 +639,17 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                                     startWordOrderMinigame(); 
                                     break;
 
-                                case Skip:
-                                    game.gameState = MinigameActive;
-                                    game.activeMinigame = Speed;
-                                    game.pendingCard = cartaRobada;
-                                    startSpeedMinigame();
+                                case Skip: {
+                                    int penalizedPlayer = (game.currentTurn + game.direction + game.playerCount) % game.playerCount;
+                                    applyPlusTwoWithMinigame(game, penalizedPlayer, game.currentTurn);
                                     break;
+                                }
 
                                 case Reverse:
                                     game.gameState = MinigameActive;
                                     game.activeMinigame = Math;
                                     game.pendingCard = cartaRobada;
+                                    runReflexesMinigame(game);
                                     break;
 
                                 default:
@@ -672,8 +671,8 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                             else
                             {
                                 // Carta no jugable, turno termina and se actualizan cartas visibles
-                                avanzarTurno(game.currentTurn, game.direction, game.playerCount, game);
-                                actualizarVisibilidadCartas(game);
+                                advanceTurn(game.currentTurn, game.direction, game.playerCount, game);
+                                updateCardVisibility(game);
                             }
                         }
                     }
@@ -684,7 +683,7 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                 {
                     for (int i = 0; i < game.playerCount; i++)
                     {
-                        if (jugadorSinCartas(game.players[i]))
+                        if (playerHasNoCards(game.players[i]))
                         {
                             DrawText(TextFormat("¡%s ha ganado la partida!", game.players[i].name.c_str()), 500, 500, 40, GREEN);
 
@@ -695,7 +694,7 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                                     game.players[j].gamesLost++;
                             }
 
-                            guardarEstadisticas(game, "estadisticas.txt");
+                            saveStatistics(game, "estadisticas.txt");
 
                             EndDrawing();
                             continue; // Salta el resto del ciclo para no sobreescribir the screen
@@ -768,7 +767,7 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                             case PlusTwo:
                             {
                                 // Si gana +2, the following player roba 2 cartas
-                                int jugadorPenalizado = (game.currentTurn + game.direction + game.playerCount) % game.playerCount;
+                                int penalizedPlayer = (game.currentTurn + game.direction + game.playerCount) % game.playerCount;
                                 for (int i = 0; i < 2; i++)
                                 {
                                     Card cartaRobada = robarCartaSimple(game);
@@ -776,22 +775,22 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                                     {
                                         for (int j = 0; j < MAX_CARDS_PER_PLAYER; j++)
                                         {
-                                            if (game.players[jugadorPenalizado].hand[j].color.empty())
+                                            if (game.players[penalizedPlayer].hand[j].color.empty())
                                             {
-                                                game.players[jugadorPenalizado].hand[j] = cartaRobada;
+                                                game.players[penalizedPlayer].hand[j] = cartaRobada;
                                                 break;
                                             }
                                         }
                                     }
                                 }
-                                avanzarTurno(game.currentTurn, game.direction, game.playerCount, game);
+                                advanceTurn(game.currentTurn, game.direction, game.playerCount, game);
                             }
                             break;
 
                             case PlusFour:
                             {
                                 // Si gana +4, the following player roba 4 cartas
-                                int jugadorPenalizado = (game.currentTurn + game.direction + game.playerCount) % game.playerCount;
+                                int penalizedPlayer = (game.currentTurn + game.direction + game.playerCount) % game.playerCount;
                                 for (int i = 0; i < 4; i++)
                                 {
                                     Card cartaRobada = robarCartaSimple(game);
@@ -799,26 +798,27 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                                     {
                                         for (int j = 0; j < MAX_CARDS_PER_PLAYER; j++)
                                         {
-                                            if (game.players[jugadorPenalizado].hand[j].color.empty())
+                                            if (game.players[penalizedPlayer].hand[j].color.empty())
                                             {
-                                                game.players[jugadorPenalizado].hand[j] = cartaRobada;
+                                                game.players[penalizedPlayer].hand[j] = cartaRobada;
                                                 break;
                                             }
                                         }
                                     }
                                 }
-                                avanzarTurno(game.currentTurn, game.direction, game.playerCount, game);
+                                advanceTurn(game.currentTurn, game.direction, game.playerCount, game);
                             }
                             break;
 
-                            case Skip:
-                                aplicarMasDosConMinijuego(game);
-                                // El avance of turno ya está en aplicarMasDosConMinijuego
+                            case Skip: {
+                                int penalizedPlayer = (game.currentTurn + game.direction + game.playerCount) % game.playerCount;
+                                applyPlusTwoWithMinigame(game, penalizedPlayer, game.currentTurn);
                                 break;
+                            }
 
                             case Reverse:
-                                aplicarCambioDireccion(game);
-                                avanzarTurno(game.currentTurn, game.direction, game.playerCount, game);
+                                applyReverse(game);
+                                advanceTurn(game.currentTurn, game.direction, game.playerCount, game);
                                 break;
 
                             default:
@@ -840,7 +840,7 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                             case PlusTwo:
                             {
                                 // Si pierde +2, the following player roba 2 cartas Y the actual player roba 2 como penalización
-                                int jugadorPenalizado = (game.currentTurn + game.direction + game.playerCount) % game.playerCount;
+                                int penalizedPlayer = (game.currentTurn + game.direction + game.playerCount) % game.playerCount;
                                 // The following player roba 2 cartas
                                 for (int i = 0; i < 2; i++)
                                 {
@@ -849,9 +849,9 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                                     {
                                         for (int j = 0; j < MAX_CARDS_PER_PLAYER; j++)
                                         {
-                                            if (game.players[jugadorPenalizado].hand[j].color.empty())
+                                            if (game.players[penalizedPlayer].hand[j].color.empty())
                                             {
-                                                game.players[jugadorPenalizado].hand[j] = cartaRobada;
+                                                game.players[penalizedPlayer].hand[j] = cartaRobada;
                                                 break;
                                             }
                                         }
@@ -873,14 +873,14 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                                         }
                                     }
                                 }
-                                avanzarTurno(game.currentTurn, game.direction, game.playerCount, game);
+                                advanceTurn(game.currentTurn, game.direction, game.playerCount, game);
                             }
                             break;
 
                             case PlusFour:
                             {
                                 // Si pierde +4, the following player roba 4 cartas Y the actual player roba 4 como penalización
-                                int jugadorPenalizado = (game.currentTurn + game.direction + game.playerCount) % game.playerCount;
+                                int penalizedPlayer = (game.currentTurn + game.direction + game.playerCount) % game.playerCount;
                                 // The following player roba 4 cartas
                                 for (int i = 0; i < 4; i++)
                                 {
@@ -889,9 +889,9 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                                     {
                                         for (int j = 0; j < MAX_CARDS_PER_PLAYER; j++)
                                         {
-                                            if (game.players[jugadorPenalizado].hand[j].color.empty())
+                                            if (game.players[penalizedPlayer].hand[j].color.empty())
                                             {
-                                                game.players[jugadorPenalizado].hand[j] = cartaRobada;
+                                                game.players[penalizedPlayer].hand[j] = cartaRobada;
                                                 break;
                                             }
                                         }
@@ -913,18 +913,19 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                                         }
                                     }
                                 }
-                                avanzarTurno(game.currentTurn, game.direction, game.playerCount, game);
+                                advanceTurn(game.currentTurn, game.direction, game.playerCount, game);
                             }
                             break;
 
-                            case Skip:
-                                aplicarMasDosConMinijuego(game);
-                                // El avance of turno ya está en aplicarMasDosConMinijuego
+                            case Skip: {
+                                int penalizedPlayer = (game.currentTurn + game.direction + game.playerCount) % game.playerCount;
+                                applyPlusTwoWithMinigame(game, penalizedPlayer, game.currentTurn);
                                 break;
+                            }
 
                             case Reverse:
-                                aplicarCambioDireccion(game);
-                                avanzarTurno(game.currentTurn, game.direction, game.playerCount, game);
+                                applyReverse(game);
+                                advanceTurn(game.currentTurn, game.direction, game.playerCount, game);
                                 break;
 
                             default:
@@ -950,7 +951,7 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                             }
                         }
 
-                        // Volver al juego normal and avanzar turno if no es bloqueo (ya lo hace aplicarMasDosConMinijuego)
+                        // Volver al juego normal and avanzar turno if no es bloqueo (ya lo hace applyPlusTwoWithMinigame)
                         game.gameState = NormalTurn;
                         game.activeMinigame = None;
 
@@ -959,10 +960,10 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
                             game.pendingCard.type != PlusFour &&
                             game.pendingCard.type != Skip)
                         {
-                            avanzarTurno(game.currentTurn, game.direction, game.playerCount, game);
+                            advanceTurn(game.currentTurn, game.direction, game.playerCount, game);
                         }
 
-                        actualizarVisibilidadCartas(game);
+                        updateCardVisibility(game);
                     }
 
                     EndDrawing();
@@ -976,7 +977,7 @@ void ejecutarJuego(UNO_Game &game, bool &amountSelected, int &currentPlayer, str
 }
 
 // Dibuja todas las cartas of the mano of a player in the screen. //a ver si funciona
-void dibujarCartasJugador(const Player &player, int xInicial, int yInicial, bool mostrarTodas)
+void drawPlayerCards(const Player &player, int xInicial, int yInicial, bool mostrarTodas)
 {
     int espacioX = 100;    // espacio between cards
     int maxCartasFila = 7; // máximo cartas por fila
@@ -1072,7 +1073,7 @@ void imprimirMazo(const UNO_Game &game)
 }
 
 // Verifica if a carta se puede jugar over the actual card in game according to the original rules of UNO.
-bool sePuedeJugar(Card actual, Card elegida)
+bool canPlay(Card actual, Card elegida)
 {
     // Comodines siempre se pueden jugar
     if (elegida.type == ChangeColor || elegida.type == PlusFour)
@@ -1094,7 +1095,7 @@ bool sePuedeJugar(Card actual, Card elegida)
 }
 
 // Detecta if hubo doble clic sobre una carta (para jugarla).
-bool cartaTuvoDobleClick(const Rectangle &rect)
+bool cardHadDoubleClick(const Rectangle &rect)
 {
     static float tiempoUltimoClick = 0;
     static int clicks = 0;
@@ -1124,7 +1125,7 @@ bool cartaTuvoDobleClick(const Rectangle &rect)
 }
 
 // Dibuja the carta in the zone of descarte.
-void dibujarZonaDescarte(const Card &carta, int x, int y)
+void drawDiscardZone(const Card &carta, int x, int y)
 {
     if (carta.color.empty())
         return;
@@ -1177,11 +1178,11 @@ void dibujarZonaDescarte(const Card &carta, int x, int y)
 }
 
 // Avanza the turno to the following player, respecting the direction of the game.
-void avanzarTurno(int &currentTurn, int direction, int totalPlayers, UNO_Game &game)
+void advanceTurn(int &currentTurn, int direction, int totalPlayers, UNO_Game &game)
 {
     currentTurn = (currentTurn + direction + totalPlayers) % totalPlayers;
     game.currentTurn = currentTurn;
-    actualizarVisibilidadCartas(game);
+    updateCardVisibility(game);
 }
 
 // Devuelve the structure with the positions of the zone visual of the mazo and descarte.
@@ -1208,7 +1209,7 @@ VisualZone getVisualZone()
 
 // Guarda o actualiza las estadísticas acumuladas of TODOS the players that have played UNO.
 // El archivo mantiene un registro único por player, sumando partidas jugadas, ganadas and minijuegos ganados.
-void guardarEstadisticas(const UNO_Game &game, const string &EstadisticaArchivo)
+void saveStatistics(const UNO_Game &game, const string &EstadisticaArchivo)
 {
     struct EstadisticasJugador {
         string nombre;
@@ -1295,7 +1296,7 @@ void guardarEstadisticas(const UNO_Game &game, const string &EstadisticaArchivo)
 
 // Ejecuta un minijuego de reflejos: the player must press a random key quickly.
 // Si gana, el rival roba 2 cartas. Si pierde, el player that lanzó el +2 roba 2 cartas.
-bool minigameReverse(UNO_Game &game) {
+bool runReflexesMinigame(UNO_Game &game) {
     int number = GetRandomValue(1, 10);
     bool answer = false; // true = even, false = odd
     bool selectionMade = false;
@@ -1354,19 +1355,19 @@ bool minigameReverse(UNO_Game &game) {
 // Si the player gana the minijuego, the following player roba 2 cartas.
 // Si pierde, the actual player (that threw the +2) roba 2 cartas as punishment.
 // Then avanza the turno respetando the direction.
-void aplicarMasDosConMinijuego(UNO_Game &game)
+void applyPlusTwoWithMinigame(UNO_Game &game, int penalizedPlayer, int wildcardPlayer)
 {
-    int currentPlayer = game.currentTurn;
+    int currentPlayer = penalizedPlayer;
     int siguienteJugador = (currentPlayer + game.direction + game.playerCount) % game.playerCount;
 
-    bool ganoMinijuego = minigameReverse(game);
+    bool ganoMinijuego = runReflexesMinigame(game);
 
     if (ganoMinijuego)
     {
         // The following player roba 2 cartas
         for (int i = 0; i < 2; i++)
         {
-            Card cartaRobada = robarCartaValida(game);
+            Card cartaRobada = drawValidCard(game);
             if (!cartaRobada.color.empty())
             {
                 for (int j = 0; j < MAX_CARDS_PER_PLAYER; j++)
@@ -1385,7 +1386,7 @@ void aplicarMasDosConMinijuego(UNO_Game &game)
         // The actual player roba 2 cartas as punishment
         for (int i = 0; i < 2; i++)
         {
-            Card cartaRobada = robarCartaValida(game);
+            Card cartaRobada = drawValidCard(game);
             if (!cartaRobada.color.empty())
             {
                 for (int j = 0; j < MAX_CARDS_PER_PLAYER; j++)
@@ -1402,13 +1403,13 @@ void aplicarMasDosConMinijuego(UNO_Game &game)
 }
 
 // Aplica the effect of the carta +4
-void aplicarMasCuatro(UNO_Game &game)
+void applyPlusFour(UNO_Game &game)
 {
     int jugadorPenalizado = (game.currentTurn + game.direction + game.playerCount) % game.playerCount;
 
     for (int i = 0; i < 4; i++)
     {
-        Card cartaRobada = robarCartaValida(game);
+        Card cartaRobada = drawValidCard(game);
         if (!cartaRobada.color.empty())
         {
             for (int j = 0; j < MAX_CARDS_PER_PLAYER; j++)
@@ -1424,28 +1425,28 @@ void aplicarMasCuatro(UNO_Game &game)
 }
 
 // Aplica the effect of change color
-void aplicarCambioColor(UNO_Game &game)
+void applyChangeColor(UNO_Game &game)
 {
     // The color se selecciona aleatoriamente después of the minijuego
     // Esta función se llama después of that the minijuego determine the color
 }
 
 // Aplica the effect of the carta bloqueo (salta turno)
-void aplicarBloqueo(UNO_Game &game)
+void applyBlock(UNO_Game &game)
 {
     // The bloqueo salta the turno of the following player respetando the direction
     // Avanza una vez for the following player, and otra vez for saltarlo
-    avanzarTurno(game.currentTurn, game.direction, game.playerCount, game);
+    advanceTurn(game.currentTurn, game.direction, game.playerCount, game);
 }
 
 // Aplica the effect of change direction
-void aplicarCambioDireccion(UNO_Game &game)
+void applyReverse(UNO_Game &game)
 {
     game.direction *= -1; // Invierte the direction of the game
 }
 
 // Función para verificar if a player no tiene cartas
-bool jugadorSinCartas(const Player &jugador)
+bool playerHasNoCards(const Player &jugador)
 {
     for (int i = 0; i < MAX_CARDS_PER_PLAYER; i++)
     {
@@ -1528,9 +1529,9 @@ bool hasCardOfColor(Player &player, const string &targetColor)
 }
 
 void runReverseMinigameWithPenalty(UNO_Game &game) {
-    bool won = minigameReverse(game);
+    bool won = runReflexesMinigame(game);
     if (won) {
-        applyReverse(game);
+        runReflexesMinigame(game);
         advanceTurn(game.currentTurn, game.direction, game.playerCount, game);
     } else {
         // Penalty: draw 2 cards and DO NOT change direction
