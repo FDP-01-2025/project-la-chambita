@@ -14,43 +14,47 @@ Los minijuegos desafían velocidad, memoria, lógica y reflejos, mezclando estra
 
 ### Integrantes del equipo
 
-1.**Nombre completo:** Aaron Enmanuel Fuentes Murillo.
+**Nombre completo:** Aaron Enmanuel Fuentes Murillo.  
   **Carnet:** 00075925
 
-2.**Nombre completo:** Joel Andres Escalante Rivas.
+**Nombre completo:** Joel Andres Escalante Rivas.  
   **Carnet:** 00031825
 
-3.**Nombre completo:** Michelle Carolina Escobar Navas.
+**Nombre completo:** Michelle Carolina Escobar Navas.  
   **Carnet:** 00081518
 
-4.**Nombre completo:** Heberto Johalmo Estrada Hernandez.
+**Nombre completo:** Heberto Johalmo Estrada Hernandez.  
 **Carnet:** 00138821
 
-##Temas de programación aplicados
-Este proyecto aplica múltiples conceptos fundamentales de programación en C++. A continuación, se detallan algunos ejemplos clave:
+## Temas de programación aplicados
+Este proyecto aplica múltiples conceptos fundamentales de programación en C++. A continuación, se detallan algunos ejemplos clave:  
 
-**🔁 Estructuras de control** 
-**If-condicionales**
-Se utilizan para validar acciones del jugador, como verificar si una carta puede jugarse:
+**🔁 Estructuras de control**  
+**If-condicionales**  
+Se utilizan para validar acciones del jugador, como verificar si una carta puede jugarse:  
 
 if (sePuedeJugar(juego.cartaEnJuego, carta)) {
     juego.cartaEnJuego = carta;
-}
+}  
 
-**While-Bucles**
+**While-Bucles**  
 
 while (!WindowShouldClose()) {
     BeginDrawing();
     // lógica del juego
     EndDrawing();
-}
-También se usa en los minijuegos, por ejemplo, para esperar la respuesta del jugador:
+}  
+
+También se usa en los minijuegos, por ejemplo, para esperar la respuesta del jugador:  
 
 while (!seleccionHecha && !WindowShouldClose()) {
     // lógica del minijuego de cambio de dirección
-}
-**switch - Selección múltiple**
-Se emplea para activar el minijuego correspondiente según el tipo de carta:
+}  
+
+**switch - Selección múltiple**  
+
+Se emplea para activar el minijuego correspondiente según el tipo de carta:  
+
 switch (carta.tipo) {
     case Carta_Mas_dos:
         iniciarMinijuegoIntruso();
@@ -59,28 +63,36 @@ switch (carta.tipo) {
         iniciarOrdenaPalabra();
         break;
     // otros casos...
-}
-🧱**Funciones**
-El código está modularizado en funciones como:
+}  
 
-*crearJuegoUNO() – Inicializa el estado del juego.
-*inicializarMazo() – Llena el mazo con cartas.
-*ejecutarJuego() – Controla el flujo principal del juego.
-*dibujarCartasJugador() – Dibuja las cartas en pantalla.
+🧱**Funciones**  
 
-🧩**Estructuras de datos**
-Se utilizan struct para representar:
+El código está modularizado en funciones como:  
 
-*Carta – Cada carta del juego.
-*Jugador – Información de cada jugador.
-*Juego_UNO – Estado general del juego.
+-**crearJuegoUNO**() – Inicializa el estado del juego.  
+-**inicializarMazo**() – Llena el mazo con cartas.  
+-**ejecutarJuego**() – Controla el flujo principal del juego.  
+-**dibujarCartasJugador**() – Dibuja las cartas en pantalla.  
 
-💾**Archivos**
-Se guardan estadísticas en un archivo de texto:
+🧩**Estructuras de datos**  
 
-*guardarEstadisticas(juego, "estadisticas.txt");
+Se utilizan struct para representar:  
 
-Este proyecto no solo representa una versión divertida y visual del clásico juego UNO, sino que también demuestra la aplicación práctica de estructuras fundamentales de programación en C++. A través del uso de condicionales, bucles, estructuras de selección, funciones, estructuras de datos, manejo de archivos y lógica de juego, se logró construir una experiencia interactiva y dinámica. Estas herramientas fueron esenciales para implementar tanto la mecánica del juego como los minijuegos, consolidando así los conocimientos adquiridos durante el curso.
+
+-**Carta** – Cada carta del juego. <br>
+-**Jugador** – Información de cada jugador. <br>
+-**Juego_UNO** – Estado general del juego. <br>
+
+💾**Archivos**  
+
+Se guardan estadísticas en un archivo de texto:  
+
+
+-**guardarEstadisticas**(juego, "estadisticas.txt");  
+
+
+Este proyecto no solo representa una versión divertida y visual del clásico juego UNO, sino que también demuestra la aplicación práctica de estructuras fundamentales de programación en C++. A través del uso de condicionales, bucles, estructuras de selección, funciones, estructuras de datos, manejo de archivos y lógica de juego, se logró construir una experiencia interactiva y dinámica. Estas herramientas fueron esenciales para implementar tanto la mecánica del juego como los minijuegos, consolidando así los conocimientos adquiridos durante el curso.  
+
 
 ## Instrucciones de Ejecución
 
