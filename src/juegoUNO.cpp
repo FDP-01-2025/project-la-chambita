@@ -865,9 +865,9 @@ void runGame(UNO_Game &game, bool &amountSelected, int &currentPlayer, string &c
                                     {
                                         for (int j = 0; j < MAX_CARDS_PER_PLAYER; j++)
                                         {
-                                            if (game.players[j].hand[j].color.empty())
+                                            if (game.players[game.currentTurn].hand[j].color.empty())
                                             {
-                                                game.players[j].hand[j] = cartaRobada;
+                                                game.players[game.currentTurn].hand[j] = cartaRobada;
                                                 break;
                                             }
                                         }
@@ -905,9 +905,9 @@ void runGame(UNO_Game &game, bool &amountSelected, int &currentPlayer, string &c
                                     {
                                         for (int j = 0; j < MAX_CARDS_PER_PLAYER; j++)
                                         {
-                                            if (game.players[j].hand[j].color.empty())
+                                            if (game.players[game.currentTurn].hand[j].color.empty())
                                             {
-                                                game.players[j].hand[j] = cartaRobada;
+                                                game.players[game.currentTurn].hand[j] = cartaRobada;
                                                 break;
                                             }
                                         }

@@ -1,0 +1,21 @@
+----- Estadísticas acumuladas of UNO -----
+Player: 1
+  Partidas jugadas: 1
+  Partidas ganadas: 0
+  Minijuegos ganados: 0
+-----------------------------------
+Player: 2
+  Partidas jugadas: 1
+  Partidas ganadas: 0
+  Minijuegos ganados: 0
+-----------------------------------
+Player: 3
+  Partidas jugadas: 1
+  Partidas ganadas: 0
+  Minijuegos ganados: 0
+-----------------------------------
+Player: 4
+  Partidas jugadas: 1
+  Partidas ganadas: 1
+  Minijuegos ganados: 0
+-----------------------------------
